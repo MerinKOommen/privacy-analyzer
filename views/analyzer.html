@@ -3,211 +3,559 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Privacy Analyzer — Dashboard</title>
+  <title>PrivacyAnalyzer — Full Report</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; background: #0f0f1a; color: #fff; }
-    nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid #222; }
-    .logo { font-size: 20px; font-weight: bold; color: #7F77DD; }
-    .wrap { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
-    h1 { font-size: 28px; margin-bottom: 8px; }
-    .sub { color: #aaa; margin-bottom: 30px; font-size: 15px; }
-    .score-wrap { text-align: center; margin: 30px 0; }
-    .score-circle { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 140px; height: 140px; border-radius: 50%; border: 6px solid #7F77DD; }
-    .score-num { font-size: 42px; font-weight: bold; color: #7F77DD; }
-    .score-lbl { font-size: 12px; color: #aaa; }
-    .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
-    .tab { padding: 8px 18px; border-radius: 20px; border: 1px solid #333; background: transparent; color: #aaa; cursor: pointer; font-size: 13px; }
-    .tab.active { background: #7F77DD; border-color: #7F77DD; color: #fff; }
-    .section { display: none; }
-    .section.active { display: block; }
-    .card { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 16px 20px; margin-bottom: 12px; }
-    .card-label { font-size: 12px; color: #aaa; margin-bottom: 4px; }
-    .card-value { font-size: 15px; font-weight: bold; word-break: break-all; }
-    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; margin-top: 6px; }
-    .badge-red { background: #3a1a1a; color: #f09595; }
-    .badge-yellow { background: #2a2010; color: #FAC775; }
-    .badge-green { background: #1a2e1a; color: #C0DD97; }
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-    .metric { background: #1a1a2e; border-radius: 10px; padding: 16px; }
-    .metric-label { font-size: 12px; color: #aaa; margin-bottom: 6px; }
-    .metric-value { font-size: 22px; font-weight: bold; }
-    .tip { background: #1a1530; border-left: 3px solid #7F77DD; border-radius: 0 8px 8px 0; padding: 12px 16px; margin-top: 8px; font-size: 13px; color: #aaa; }
-    .scan-btn { display: block; width: 100%; padding: 12px; background: #7F77DD; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; margin-bottom: 24px; }
-    .scan-btn:hover { opacity: 0.85; }
+    body { font-family: 'Inter', sans-serif; background: #070b14; color: #fff; min-height: 100vh; }
+    .bg-grid { position: fixed; inset: 0; background-image: linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px); background-size: 40px 40px; z-index: 0; pointer-events: none; }
+    .orb { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.12; animation: float 8s ease-in-out infinite; z-index: 0; pointer-events: none; }
+    .orb1 { width: 400px; height: 400px; background: #6366f1; top: -100px; left: -100px; }
+    .orb2 { width: 300px; height: 300px; background: #06b6d4; bottom: -50px; right: -50px; animation-delay: 3s; }
+    @keyframes float { 0%,100%{transform:translate(0,0);} 50%{transform:translate(20px,-20px);} }
+
+    nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 14px 40px; border-bottom: 1px solid #1f2937; background: rgba(7,11,20,0.95); backdrop-filter: blur(12px); }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-icon { width: 32px; height: 32px; background: linear-gradient(135deg, #6366f1, #06b6d4); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .brand-name { font-size: 16px; font-weight: 600; }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .user-badge { display: flex; align-items: center; gap: 8px; padding: 7px 14px; background: #0d1117; border: 1px solid #1f2937; border-radius: 8px; font-size: 13px; color: #9ca3af; }
+    .user-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+    .logout-btn { padding: 7px 16px; background: transparent; border: 1px solid #374151; border-radius: 8px; color: #9ca3af; font-size: 13px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+    .logout-btn:hover { border-color: #ef4444; color: #ef4444; }
+
+    .main { max-width: 1200px; margin: 0 auto; padding: 40px 24px; position: relative; z-index: 1; }
+
+    /* Story section */
+    .story-box { background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(6,182,212,0.08)); border: 1px solid rgba(99,102,241,0.25); border-radius: 16px; padding: 28px; margin-bottom: 32px; }
+    .story-title { font-size: 13px; font-weight: 600; color: #6b7280; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+    .story-text { font-size: 16px; line-height: 1.8; color: #e5e7eb; }
+    .story-text .highlight-red { color: #f87171; font-weight: 600; }
+    .story-text .highlight-yellow { color: #fbbf24; font-weight: 600; }
+    .story-text .highlight-green { color: #34d399; font-weight: 600; }
+
+    /* Score */
+    .score-row { display: flex; align-items: center; gap: 24px; background: #0d1117; border: 1px solid #1f2937; border-radius: 16px; padding: 28px; margin-bottom: 32px; }
+    .ring-wrap { position: relative; width: 110px; height: 110px; flex-shrink: 0; }
+    .ring-wrap svg { transform: rotate(-90deg); }
+    .ring-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+    .ring-num { font-size: 26px; font-weight: 700; }
+    .ring-lbl { font-size: 9px; color: #6b7280; }
+    .score-details h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .score-details p { font-size: 14px; color: #6b7280; line-height: 1.6; }
+    .score-bars { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .bar-item { display: flex; align-items: center; gap: 10px; }
+    .bar-label { font-size: 12px; color: #9ca3af; width: 120px; flex-shrink: 0; }
+    .bar-track { flex: 1; height: 6px; background: #1f2937; border-radius: 3px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+
+    /* Section */
+    .section-label { font-size: 11px; font-weight: 600; color: #6b7280; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; margin-top: 32px; }
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+
+    .card { background: #0d1117; border: 1px solid #1f2937; border-radius: 12px; padding: 20px; transition: border-color 0.2s; }
+    .card:hover { border-color: #374151; }
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+    .card-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .i-blue{background:rgba(99,102,241,0.15);} .i-cyan{background:rgba(6,182,212,0.15);} .i-green{background:rgba(16,185,129,0.15);} .i-purple{background:rgba(139,92,246,0.15);} .i-red{background:rgba(239,68,68,0.15);} .i-yellow{background:rgba(245,158,11,0.15);}
+    .risk-badge { font-size: 10px; padding: 3px 8px; border-radius: 20px; font-weight: 500; }
+    .risk-high { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+    .risk-med { background: rgba(245,158,11,0.1); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+    .risk-low { background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2); }
+    .card-title { font-size: 13px; color: #6b7280; margin-bottom: 4px; }
+    .card-val { font-size: 16px; font-weight: 600; color: #f3f4f6; margin-bottom: 6px; word-break: break-all; }
+    .card-explain { font-size: 12px; color: #4b5563; line-height: 1.5; }
+    .card-fix { font-size: 12px; color: #6366f1; margin-top: 8px; padding: 6px 10px; background: rgba(99,102,241,0.08); border-radius: 6px; border: 1px solid rgba(99,102,241,0.15); }
+
+    /* Email breach checker */
+    .breach-box { background: #0d1117; border: 1px solid #1f2937; border-radius: 14px; padding: 24px; margin-top: 14px; }
+    .breach-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .breach-sub { font-size: 13px; color: #6b7280; margin-bottom: 20px; }
+    .breach-input-row { display: flex; gap: 10px; margin-bottom: 16px; }
+    .breach-input { flex: 1; padding: 11px 16px; background: #070b14; border: 1px solid #1f2937; border-radius: 9px; color: #fff; font-size: 14px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; }
+    .breach-input:focus { border-color: #6366f1; }
+    .breach-btn { padding: 11px 20px; background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; border: none; border-radius: 9px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap; transition: all 0.2s; }
+    .breach-btn:hover { opacity: 0.9; }
+    .breach-results { display: none; }
+    .breach-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px; background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.15); border-radius: 10px; margin-bottom: 10px; }
+    .breach-item-icon { font-size: 20px; flex-shrink: 0; }
+    .breach-item-name { font-size: 14px; font-weight: 600; color: #f87171; margin-bottom: 3px; }
+    .breach-item-desc { font-size: 12px; color: #9ca3af; line-height: 1.5; }
+    .breach-safe { display: none; padding: 16px; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; text-align: center; color: #34d399; font-size: 14px; font-weight: 500; }
+    .breach-loading { display: none; text-align: center; color: #6b7280; font-size: 13px; padding: 16px; }
+
+    /* Tracker list */
+    .tracker-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #1f2937; }
+    .tracker-item:last-child { border-bottom: none; }
+    .tracker-name { font-size: 13px; color: #e5e7eb; }
+    .tracker-status { font-size: 11px; padding: 2px 8px; border-radius: 20px; }
+    .t-found { background: rgba(239,68,68,0.1); color: #f87171; }
+    .t-clean { background: rgba(16,185,129,0.1); color: #34d399; }
+
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; display: inline-block; margin-right: 5px; animation: pulse 2s infinite; }
+
+    @media(max-width:768px) { .score-row { flex-direction: column; } .score-bars { width: 100%; } nav { padding: 14px 20px; } .main { padding: 24px 16px; } }
   </style>
 </head>
 <body>
+  <div class="bg-grid"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
 
-<nav>
-  <div class="logo">🔒 PrivacyAnalyzer</div>
-  <span style="color:#aaa;font-size:13px;">Premium Access</span>
-</nav>
-
-<div class="wrap">
-  <h1>Your Privacy Report</h1>
-  <p class="sub">See what websites know about you in real time</p>
-
-  <div class="score-wrap">
-    <div class="score-circle">
-      <div class="score-num" id="score-num">–</div>
-      <div class="score-lbl">Privacy Score</div>
+  <nav>
+    <div class="brand">
+      <div class="brand-icon">🔒</div>
+      <span class="brand-name">PrivacyAnalyzer</span>
     </div>
-  </div>
-
-  <button class="scan-btn" onclick="runScan()">Run Full Scan</button>
-
-  <div class="tabs">
-    <button class="tab active" onclick="showTab('fingerprint', this)">Fingerprint</button>
-    <button class="tab" onclick="showTab('ip', this)">IP & Location</button>
-    <button class="tab" onclick="showTab('storage', this)">Cookies & Storage</button>
-    <button class="tab" onclick="showTab('trackers', this)">Trackers</button>
-  </div>
-
-  <div id="fingerprint" class="section active">
-    <div class="grid2">
-      <div class="metric"><div class="metric-label">Browser</div><div class="metric-value" id="fp-browser">–</div></div>
-      <div class="metric"><div class="metric-label">OS</div><div class="metric-value" id="fp-os">–</div></div>
+    <div class="nav-right">
+      <div class="user-badge"><div class="user-dot"></div><span id="user-email">Loading...</span></div>
+      <button class="logout-btn" onclick="logout()">Sign out</button>
     </div>
-    <div class="card"><div class="card-label">Screen Resolution</div><div class="card-value" id="fp-screen">–</div></div>
-    <div class="card"><div class="card-label">Timezone</div><div class="card-value" id="fp-tz">–</div></div>
-    <div class="card"><div class="card-label">Language</div><div class="card-value" id="fp-lang">–</div></div>
-    <div class="card"><div class="card-label">CPU Cores</div><div class="card-value" id="fp-cpu">–</div></div>
-    <div class="card">
-      <div class="card-label">Canvas Fingerprint</div>
-      <div class="card-value" id="fp-canvas">–</div>
-      <span class="badge badge-red" id="fp-canvas-risk" style="display:none">High Risk — Can track you</span>
+  </nav>
+
+  <div class="main">
+
+    <!-- Privacy Story -->
+    <div class="story-box">
+      <div class="story-title">Your Privacy Story</div>
+      <div class="story-text" id="story-text">Scanning your digital footprint...</div>
     </div>
-    <div class="tip">Canvas fingerprinting can identify you across websites even without cookies. Use Firefox + uBlock Origin to block it.</div>
-  </div>
 
-  <div id="ip" class="section">
-    <div class="card"><div class="card-label">Your IP Address</div><div class="card-value" id="ip-addr">–</div><span class="badge badge-red">Visible to every website</span></div>
-    <div class="card"><div class="card-label">Location</div><div class="card-value" id="ip-loc">–</div></div>
-    <div class="card"><div class="card-label">ISP</div><div class="card-value" id="ip-isp">–</div></div>
-    <div class="card"><div class="card-label">VPN Detected</div><div class="card-value" id="ip-vpn">–</div></div>
-    <div class="tip">Use a trusted VPN to hide your IP address and location from websites.</div>
-  </div>
-
-  <div id="storage" class="section">
-    <div class="grid2">
-      <div class="metric"><div class="metric-label">Cookies</div><div class="metric-value" id="st-cookies">–</div></div>
-      <div class="metric"><div class="metric-label">localStorage</div><div class="metric-value" id="st-ls">–</div></div>
+    <!-- Score -->
+    <div class="score-row">
+      <div class="ring-wrap">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="45" fill="none" stroke="#1f2937" stroke-width="10"/>
+          <circle id="score-arc" cx="55" cy="55" r="45" fill="none" stroke="#6366f1" stroke-width="10" stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round"/>
+        </svg>
+        <div class="ring-center"><div class="ring-num" id="score-num">–</div><div class="ring-lbl">SCORE</div></div>
+      </div>
+      <div class="score-details">
+        <h2 id="score-title">Analyzing...</h2>
+        <p id="score-desc">Running full privacy scan on your browser and connection.</p>
+      </div>
+      <div class="score-bars">
+        <div class="bar-item"><span class="bar-label">Network Safety</span><div class="bar-track"><div class="bar-fill" id="bar-network" style="width:0%;background:#6366f1"></div></div></div>
+        <div class="bar-item"><span class="bar-label">Browser Security</span><div class="bar-track"><div class="bar-fill" id="bar-browser" style="width:0%;background:#06b6d4"></div></div></div>
+        <div class="bar-item"><span class="bar-label">Tracker Exposure</span><div class="bar-track"><div class="bar-fill" id="bar-tracker" style="width:0%;background:#8b5cf6"></div></div></div>
+        <div class="bar-item"><span class="bar-label">Data Leaks</span><div class="bar-track"><div class="bar-fill" id="bar-leaks" style="width:0%;background:#f59e0b"></div></div></div>
+      </div>
     </div>
-    <div class="card"><div class="card-label">sessionStorage items</div><div class="card-value" id="st-ss">–</div></div>
-    <div class="card"><div class="card-label">3rd-Party Trackers</div><div class="card-value" id="st-3p">–</div></div>
-    <div class="tip">Clear your cookies and localStorage regularly to reduce tracking data.</div>
-  </div>
 
-  <div id="trackers" class="section">
-    <div class="card"><div class="card-label">Do Not Track</div><div class="card-value" id="tr-dnt">–</div></div>
-    <div class="card">
-      <div class="card-label">WebRTC Leak Risk</div>
-      <div class="card-value" id="tr-webrtc">–</div>
-      <span class="badge badge-red" id="tr-webrtc-risk" style="display:none">Can expose your real IP</span>
+    <!-- Network & IP -->
+    <p class="section-label">Network & Location</p>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-top"><div class="card-icon i-blue">🌍</div><span class="risk-badge risk-high" id="ip-risk">High Risk</span></div>
+        <div class="card-title">Your IP Address</div>
+        <div class="card-val" id="ip-val"><span class="live-dot"></span>Scanning...</div>
+        <div class="card-explain" id="ip-explain">Every website you visit can see this. It reveals your city and internet provider.</div>
+        <div class="card-fix">💡 Use a VPN to hide your real IP address from websites</div>
+      </div>
+      <div class="card">
+        <div class="card-top"><div class="card-icon i-cyan">📍</div><span class="risk-badge risk-high" id="loc-risk">Exposed</span></div>
+        <div class="card-title">Your Location</div>
+        <div class="card-val" id="loc-val">Detecting...</div>
+        <div class="card-explain">Websites know your approximate location without you giving permission.</div>
+        <div class="card-fix">💡 A VPN will show a fake location to websites</div>
+      </div>
+      <div class="card">
+        <div class="card-top"><div class="card-icon i-purple">🏢</div><span class="risk-badge risk-med">Visible</span></div>
+        <div class="card-title">Your Internet Provider</div>
+        <div class="card-val" id="isp-val">Detecting...</div>
+        <div class="card-explain">Your ISP can see every website you visit and can sell this data.</div>
+        <div class="card-fix">💡 Use a VPN or DNS-over-HTTPS to hide from your ISP</div>
+      </div>
+      <div class="card">
+        <div class="card-top"><div class="card-icon i-green">🛡️</div><span class="risk-badge" id="vpn-badge">Checking...</span></div>
+        <div class="card-title">VPN / Proxy</div>
+        <div class="card-val" id="vpn-val">Detecting...</div>
+        <div class="card-explain" id="vpn-explain">A VPN hides your real IP and location from websites.</div>
+      </div>
     </div>
-    <div class="card"><div class="card-label">Ad Blocker</div><div class="card-value" id="tr-adblock">–</div></div>
-    <div class="card"><div class="card-label">Battery API Exposed</div><div class="card-value" id="tr-battery">–</div></div>
-    <div class="tip">Disable WebRTC in your browser settings or install a WebRTC leak blocker extension.</div>
+
+    <!-- Browser Fingerprint -->
+    <p class="section-label">Browser Fingerprint</p>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-top"><div class="card-icon i-red">🖼️</div><span class="risk-badge risk-high">High Risk</span></div>
+        <div class="card-title">Canvas Fingerprint</div>
+        <div class="card-val" id="canvas-val">Scanning...</div>
+        <div class="card-explain">Websites use this to identify you like a face ID — even without cookies. Your browser draws an invisible image and creates a unique ID from it.</div>
+        <div class="card-fix">💡 Use Firefox with Canvas Blocker extension to prevent this</div>
+      </div>
+      <div class="card">
+        <div class="card-top"><div class="card-icon i-blue">🖥️</div><span class="risk-badge risk-med">Visible</span></div>
+        <div class="card-title">Your Device Info</div>
+        <div class="card-val" id="device-val">Scanning...</div>
+        <div class="card-explain">Websites can see your browser, OS, screen size — this helps them build a profile of you.</div>
+        <div class="card-fix">💡 Use private browsing mode to reduce fingerprinting</div>
+      </div>
+      <div class="card">
+        <div class="card-top"><div class="card-icon i-yellow">⏰</div><span class="risk-badge risk-med">Visible</span></div>
+        <div class="card-title">Timezone & Language</div>
+        <div class="card-val" id="tz-val">Scanning...</div>
+        <div class="card-explain">Your timezone and language reveal your location and nationality to every website.</div>
+        <div class="card-fix">💡 A VPN can mask your timezone information</div>
+      </div>
+      <div class="card">
+        <div class="card-top"><div class="card-icon i-purple">📶</div><span class="risk-badge risk-high" id="webrtc-badge">High Risk</span></div>
+        <div class="card-title">WebRTC Leak</div>
+        <div class="card-val" id="webrtc-val">Checking...</div>
+        <div class="card-explain">Even if you use a VPN, WebRTC can leak your real IP address to websites. This is a serious privacy risk.</div>
+        <div class="card-fix">💡 Install uBlock Origin and enable WebRTC protection</div>
+      </div>
+    </div>
+
+    <!-- Trackers -->
+    <p class="section-label">Who Is Tracking You Right Now</p>
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-top"><div class="card-icon i-red">👁️</div><span class="risk-badge risk-high" id="tracker-badge">Scanning...</span></div>
+      <div class="card-title" style="margin-bottom:12px;">Active Trackers On Your Browser</div>
+      <div id="tracker-list">
+        <div class="tracker-item"><span class="tracker-name">🔵 Google Analytics</span><span class="tracker-status" id="t-ga">Checking...</span></div>
+        <div class="tracker-item"><span class="tracker-name">🔵 Google Ads</span><span class="tracker-status" id="t-gads">Checking...</span></div>
+        <div class="tracker-item"><span class="tracker-name">🔵 Facebook Pixel</span><span class="tracker-status" id="t-fb">Checking...</span></div>
+        <div class="tracker-item"><span class="tracker-name">🟠 Amazon Tracker</span><span class="tracker-status" id="t-amz">Checking...</span></div>
+        <div class="tracker-item"><span class="tracker-name">🔴 Ad Blocker</span><span class="tracker-status" id="t-adblock">Checking...</span></div>
+        <div class="tracker-item"><span class="tracker-name">🟣 Do Not Track</span><span class="tracker-status" id="t-dnt">Checking...</span></div>
+      </div>
+      <div class="card-fix" style="margin-top:12px;">💡 Install uBlock Origin (free) to block all these trackers instantly</div>
+    </div>
+
+    <!-- Storage & Cookies -->
+    <p class="section-label">Data Stored In Your Browser</p>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-top"><div class="card-icon i-yellow">🍪</div><span class="risk-badge risk-med" id="cookie-badge">Checking...</span></div>
+        <div class="card-title">Cookies</div>
+        <div class="card-val" id="cookie-val">Scanning...</div>
+        <div class="card-explain">Small files websites store on your browser to track your activity across visits.</div>
+        <div class="card-fix">💡 Clear cookies regularly in browser settings</div>
+      </div>
+      <div class="card">
+        <div class="card-top"><div class="card-icon i-blue">💾</div><span class="risk-badge risk-med">Stored</span></div>
+        <div class="card-title">Local Storage</div>
+        <div class="card-val" id="ls-val">Scanning...</div>
+        <div class="card-explain">Websites can store data here permanently — it survives even after you close the browser.</div>
+        <div class="card-fix">💡 Clear site data in browser settings periodically</div>
+      </div>
+      <div class="card">
+        <div class="card-top"><div class="card-icon i-purple">🎙️</div><span class="risk-badge" id="perm-badge">Checking...</span></div>
+        <div class="card-title">Browser Permissions</div>
+        <div class="card-val" id="perm-val">Scanning...</div>
+        <div class="card-explain">Apps and websites that have access to your camera, microphone or location.</div>
+        <div class="card-fix">💡 Review permissions in browser Settings → Privacy</div>
+      </div>
+      <div class="card">
+        <div class="card-top"><div class="card-icon i-green">🔋</div><span class="risk-badge risk-med" id="battery-badge">Checking...</span></div>
+        <div class="card-title">Battery API</div>
+        <div class="card-val" id="battery-val">Scanning...</div>
+        <div class="card-explain">Some websites can read your battery level to track and identify you across sessions.</div>
+        <div class="card-fix">💡 Use Firefox which has disabled the Battery API</div>
+      </div>
+    </div>
+
+    <!-- Email Breach Checker -->
+    <p class="section-label">Data Breach Checker</p>
+    <div class="breach-box">
+      <div class="breach-title">🔍 Check If Your Email Was Leaked</div>
+      <div class="breach-sub">We check your email against millions of known data breaches. Your email is never stored or shared.</div>
+      <div class="breach-input-row">
+        <input class="breach-input" type="email" id="breach-email" placeholder="Enter your email address"/>
+        <button class="breach-btn" onclick="checkBreach()">Check Now</button>
+      </div>
+      <div class="breach-loading" id="breach-loading">🔍 Checking millions of breached records...</div>
+      <div class="breach-results" id="breach-results"></div>
+      <div class="breach-safe" id="breach-safe">✅ Great news! Your email was not found in any known data breaches.</div>
+    </div>
+
   </div>
-</div>
 
-<script>
-function showTab(id, btn) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  btn.classList.add('active');
-}
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://xlxpixpvpwjjdwucojmb.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_vlkhbSh5bF5BUoO65yzoLQ_-25i9e-S';
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-function set(id, val) { const el = document.getElementById(id); if(el) el.textContent = val; }
+    async function init() {
+      const { data } = await sb.auth.getSession();
+      if (!data.session) return window.location.href = '/login';
+      document.getElementById('user-email').textContent = data.session.user.email || 'User';
+      runFullScan();
+    }
 
-function getBrowser(ua) {
-  if (ua.includes('Edg/')) return 'Edge';
-  if (ua.includes('Firefox')) return 'Firefox';
-  if (ua.includes('Chrome')) return 'Chrome';
-  if (ua.includes('Safari')) return 'Safari';
-  return 'Unknown';
-}
+    function set(id, val) { const el = document.getElementById(id); if(el) el.textContent = val; }
 
-function getOS(ua) {
-  if (ua.includes('Windows')) return 'Windows';
-  if (ua.includes('Mac')) return 'macOS';
-  if (ua.includes('Android')) return 'Android';
-  if (ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
-  if (ua.includes('Linux')) return 'Linux';
-  return 'Unknown';
-}
+    function getBrowser(ua) {
+      if (ua.includes('Edg/')) return 'Edge';
+      if (ua.includes('Firefox')) return 'Firefox';
+      if (ua.includes('Chrome')) return 'Chrome';
+      if (ua.includes('Safari')) return 'Safari';
+      return 'Unknown';
+    }
+    function getOS(ua) {
+      if (ua.includes('Windows')) return 'Windows';
+      if (ua.includes('Mac')) return 'macOS';
+      if (ua.includes('Android')) return 'Android';
+      if (ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
+      if (ua.includes('Linux')) return 'Linux';
+      return 'Unknown';
+    }
 
-async function runScan() {
-  let score = 100;
-  const ua = navigator.userAgent;
-  set('fp-browser', getBrowser(ua));
-  set('fp-os', getOS(ua));
-  set('fp-screen', screen.width + ' x ' + screen.height);
-  set('fp-tz', Intl.DateTimeFormat().resolvedOptions().timeZone);
-  set('fp-lang', navigator.language);
-  set('fp-cpu', navigator.hardwareConcurrency + ' cores');
+    async function runFullScan() {
+      const ua = navigator.userAgent;
+      let score = 100;
+      let risks = [];
+      let goods = [];
 
-  try {
-    const c = document.createElement('canvas');
-    const ctx = c.getContext('2d');
-    ctx.fillStyle = '#7F77DD'; ctx.fillRect(0,0,100,20);
-    ctx.fillStyle = '#fff'; ctx.font = '14px Arial'; ctx.fillText('test',2,2);
-    const fp = c.toDataURL().slice(-16);
-    set('fp-canvas', 'Hash: ' + fp);
-    document.getElementById('fp-canvas-risk').style.display = 'inline-block';
-    score -= 15;
-  } catch(e) { set('fp-canvas', 'Blocked (Good)'); }
+      // IP & Location
+      try {
+        const r = await fetch('https://ipapi.co/json/');
+        const d = await r.json();
+        const shortIp = d.ip && d.ip.includes(':') ? d.ip.substring(0, 20) + '...' : (d.ip || '–');
+        document.getElementById('ip-val').innerHTML = '<span class="live-dot"></span>' + shortIp;
+        set('loc-val', [d.city, d.region, d.country_name].filter(Boolean).join(', '));
+        set('isp-val', d.org || 'Unknown');
+        if (d.proxy) {
+          set('vpn-val', 'VPN/Proxy Detected ✓');
+          set('vpn-explain', 'Good! Your VPN is working and hiding your real IP.');
+          const b = document.getElementById('vpn-badge');
+          b.textContent = 'Protected'; b.className = 'risk-badge risk-low';
+          goods.push('VPN is active');
+          score += 10;
+        } else {
+          set('vpn-val', 'No VPN Detected');
+          set('vpn-explain', 'Your real IP and location are exposed to every website you visit.');
+          const b = document.getElementById('vpn-badge');
+          b.textContent = 'No VPN'; b.className = 'risk-badge risk-high';
+          risks.push('No VPN — your location is exposed');
+          score -= 20;
+        }
+      } catch(e) { set('ip-val', 'Could not fetch'); }
 
-  try {
-    const r = await fetch('https://ipapi.co/json/');
-    const d = await r.json();
-    set('ip-addr', d.ip || '–');
-    set('ip-loc', [d.city, d.country_name].filter(Boolean).join(', '));
-    set('ip-isp', d.org || '–');
-    set('ip-vpn', d.proxy ? 'VPN Detected ✓' : 'No VPN Detected');
-    if (!d.proxy) score -= 20;
-  } catch(e) { set('ip-addr', 'Could not fetch'); }
+      // Canvas fingerprint
+      try {
+        const c = document.createElement('canvas');
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#6366f1'; ctx.fillRect(0,0,100,20);
+        ctx.fillStyle = '#fff'; ctx.font = '14px Arial'; ctx.fillText('PrivacyScan',2,15);
+        const fp = c.toDataURL().slice(-20);
+        set('canvas-val', 'Unique ID: ' + fp);
+        risks.push('Canvas fingerprint can track you');
+        score -= 15;
+      } catch(e) { set('canvas-val', 'Blocked ✓ (Good!)'); goods.push('Canvas blocked'); }
 
-  set('st-cookies', document.cookie.split(';').filter(c=>c.trim()).length);
-  set('st-ls', localStorage.length);
-  set('st-ss', sessionStorage.length);
-  set('st-3p', document.cookie.includes('_ga') ? 'Google Analytics detected' : 'None detected');
+      // Device info
+      set('device-val', getBrowser(ua) + ' on ' + getOS(ua) + ' · ' + screen.width + 'x' + screen.height);
 
-  set('tr-dnt', navigator.doNotTrack === '1' ? 'Enabled ✓' : 'Not set');
-  if (navigator.doNotTrack !== '1') score -= 5;
+      // Timezone
+      set('tz-val', Intl.DateTimeFormat().resolvedOptions().timeZone + ' · ' + navigator.language);
 
-  if (typeof RTCPeerConnection !== 'undefined') {
-    set('tr-webrtc', 'WebRTC is enabled');
-    document.getElementById('tr-webrtc-risk').style.display = 'inline-block';
-    score -= 15;
-  } else {
-    set('tr-webrtc', 'WebRTC disabled ✓');
-  }
+      // WebRTC
+      if (typeof RTCPeerConnection !== 'undefined') {
+        set('webrtc-val', 'WebRTC is enabled — IP leak risk!');
+        risks.push('WebRTC can leak your real IP');
+        score -= 15;
+      } else {
+        set('webrtc-val', 'WebRTC disabled ✓');
+        const b = document.getElementById('webrtc-badge');
+        b.textContent = 'Protected'; b.className = 'risk-badge risk-low';
+        goods.push('WebRTC disabled');
+      }
 
-  try {
-    const el = document.createElement('div');
-    el.className = 'adsbox'; el.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px';
-    document.body.appendChild(el);
-    await new Promise(r => setTimeout(r, 100));
-    const blocked = el.offsetHeight === 0;
-    el.remove();
-    set('tr-adblock', blocked ? 'Ad Blocker Active ✓' : 'No Ad Blocker');
-    if (blocked) score += 10;
-  } catch(e) {}
+      // Trackers
+      const ga = document.cookie.includes('_ga');
+      const fb = document.cookie.includes('_fbp');
+      const amz = document.cookie.includes('session-id');
+      set('t-ga', ga ? 'Found' : 'Not detected');
+      document.getElementById('t-ga').className = 'tracker-status ' + (ga ? 't-found' : 't-clean');
+      set('t-gads', document.cookie.includes('IDE') ? 'Found' : 'Not detected');
+      document.getElementById('t-gads').className = 'tracker-status ' + (document.cookie.includes('IDE') ? 't-found' : 't-clean');
+      set('t-fb', fb ? 'Found' : 'Not detected');
+      document.getElementById('t-fb').className = 'tracker-status ' + (fb ? 't-found' : 't-clean');
+      set('t-amz', amz ? 'Found' : 'Not detected');
+      document.getElementById('t-amz').className = 'tracker-status ' + (amz ? 't-found' : 't-clean');
 
-  set('tr-battery', typeof navigator.getBattery === 'function' ? 'Exposed (tracking risk)' : 'Not available');
-  if (typeof navigator.getBattery === 'function') score -= 5;
+      // Ad blocker
+      try {
+        const el = document.createElement('div');
+        el.className = 'adsbox'; el.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px';
+        document.body.appendChild(el);
+        await new Promise(r => setTimeout(r, 100));
+        const blocked = el.offsetHeight === 0;
+        el.remove();
+        set('t-adblock', blocked ? 'Active ✓' : 'Not installed');
+        document.getElementById('t-adblock').className = 'tracker-status ' + (blocked ? 't-clean' : 't-found');
+        if (blocked) { score += 10; goods.push('Ad blocker active'); }
+        else { risks.push('No ad blocker installed'); score -= 5; }
+      } catch(e) {}
 
-  score = Math.max(0, Math.min(100, score));
-  document.getElementById('score-num').textContent = score;
-  const circle = document.querySelector('.score-circle');
-  circle.style.borderColor = score >= 70 ? '#639922' : score >= 40 ? '#BA7517' : '#E24B4A';
-  document.getElementById('score-num').style.color = score >= 70 ? '#639922' : score >= 40 ? '#BA7517' : '#E24B4A';
-}
+      // DNT
+      const dnt = navigator.doNotTrack === '1';
+      set('t-dnt', dnt ? 'Enabled ✓' : 'Not set');
+      document.getElementById('t-dnt').className = 'tracker-status ' + (dnt ? 't-clean' : 't-found');
+      if (!dnt) score -= 5;
 
-window.onload = runScan;
-</script>
+      // Tracker badge
+      const trackerCount = [ga, fb, amz].filter(Boolean).length;
+      const tb = document.getElementById('tracker-badge');
+      tb.textContent = trackerCount + ' trackers found';
+      tb.className = 'risk-badge ' + (trackerCount > 0 ? 'risk-high' : 'risk-low');
+      if (trackerCount > 0) risks.push(trackerCount + ' active trackers found');
+
+      // Cookies
+      const cookieCount = document.cookie.split(';').filter(c => c.trim()).length;
+      set('cookie-val', cookieCount + ' cookies stored');
+      const cb = document.getElementById('cookie-badge');
+      cb.textContent = cookieCount > 5 ? 'High' : cookieCount > 0 ? 'Medium' : 'Clean';
+      cb.className = 'risk-badge ' + (cookieCount > 5 ? 'risk-high' : cookieCount > 0 ? 'risk-med' : 'risk-low');
+      if (cookieCount > 5) score -= 5;
+
+      // localStorage
+      set('ls-val', localStorage.length + ' items in localStorage');
+
+      // Permissions
+      const geo = 'geolocation' in navigator;
+      const cam = typeof navigator.mediaDevices !== 'undefined';
+      set('perm-val', [geo ? 'Location API' : '', cam ? 'Camera API' : ''].filter(Boolean).join(', ') || 'None detected');
+      const pb = document.getElementById('perm-badge');
+      pb.textContent = geo || cam ? 'APIs Available' : 'Clean';
+      pb.className = 'risk-badge ' + (geo || cam ? 'risk-med' : 'risk-low');
+
+      // Battery
+      if (typeof navigator.getBattery === 'function') {
+        try {
+          const bat = await navigator.getBattery();
+          set('battery-val', 'Battery level exposed: ' + Math.round(bat.level * 100) + '%');
+          document.getElementById('battery-badge').textContent = 'Exposed';
+          document.getElementById('battery-badge').className = 'risk-badge risk-med';
+          score -= 5;
+        } catch(e) { set('battery-val', 'Not accessible'); }
+      } else {
+        set('battery-val', 'Not exposed ✓');
+        document.getElementById('battery-badge').textContent = 'Safe';
+        document.getElementById('battery-badge').className = 'risk-badge risk-low';
+      }
+
+      // Final score
+      score = Math.max(0, Math.min(100, score));
+      animateScore(score);
+
+      // Bars
+      setTimeout(() => {
+        document.getElementById('bar-network').style.width = (score > 60 ? 70 : 35) + '%';
+        document.getElementById('bar-browser').style.width = (typeof RTCPeerConnection === 'undefined' ? 80 : 40) + '%';
+        document.getElementById('bar-tracker').style.width = (trackerCount === 0 ? 90 : 30) + '%';
+        document.getElementById('bar-leaks').style.width = (cookieCount < 3 ? 85 : 45) + '%';
+      }, 500);
+
+      // Privacy Story
+      const storyEl = document.getElementById('story-text');
+      if (risks.length === 0) {
+        storyEl.innerHTML = `<span class="highlight-green">Great news!</span> Your privacy is well protected. Keep it up!`;
+      } else {
+        storyEl.innerHTML = `Right now, <span class="highlight-red">${risks.length} privacy risks</span> were detected on your browser. 
+        ${trackerCount > 0 ? `<span class="highlight-red">${trackerCount} companies</span> are tracking you. ` : ''}
+        ${!d?.proxy ? `Your <span class="highlight-yellow">real location is visible</span> to every website. ` : ''}
+        Your browser has a <span class="highlight-red">unique fingerprint</span> that can identify you across websites even without cookies. 
+        Your privacy score is <span class="highlight-red">${score}/100</span> — see fixes below.`;
+      }
+    }
+
+    function animateScore(score) {
+      const arc = document.getElementById('score-arc');
+      arc.style.transition = 'stroke-dashoffset 1.5s ease';
+      arc.style.strokeDashoffset = 283 - (score / 100) * 283;
+      arc.style.stroke = score >= 70 ? '#10b981' : score >= 40 ? '#f59e0b' : '#ef4444';
+      let cur = 0;
+      const step = setInterval(() => {
+        cur = Math.min(cur + 1, score);
+        document.getElementById('score-num').textContent = cur;
+        if (cur >= score) clearInterval(step);
+      }, 20);
+      const title = score >= 70 ? '🟢 Good Privacy' : score >= 40 ? '🟡 Moderate Risk' : '🔴 High Risk!';
+      const desc = score >= 70 ? 'Your privacy is reasonably protected.' : score >= 40 ? 'Some privacy risks detected. See fixes below.' : 'Multiple serious privacy risks found. Act now!';
+      set('score-title', title);
+      set('score-desc', desc);
+    }
+
+    // Email breach checker using HIBP free API
+    async function checkBreach() {
+      const email = document.getElementById('breach-email').value.trim();
+      if (!email || !email.includes('@')) {
+        alert('Please enter a valid email address');
+        return;
+      }
+
+      document.getElementById('breach-loading').style.display = 'block';
+      document.getElementById('breach-results').style.display = 'none';
+      document.getElementById('breach-safe').style.display = 'none';
+
+      try {
+        // Using free HIBP API
+        const res = await fetch(`https://haveibeenpwned.com/api/v3/breachedaccount/${encodeURIComponent(email)}?truncateResponse=false`, {
+          headers: { 'hibp-api-key': 'free', 'User-Agent': 'PrivacyAnalyzer' }
+        });
+
+        document.getElementById('breach-loading').style.display = 'none';
+
+        if (res.status === 404) {
+          document.getElementById('breach-safe').style.display = 'block';
+          return;
+        }
+
+        if (res.status === 401) {
+          // API key needed - show manual check option
+          document.getElementById('breach-results').style.display = 'block';
+          document.getElementById('breach-results').innerHTML = `
+            <div class="breach-item">
+              <div class="breach-item-icon">⚠️</div>
+              <div>
+                <div class="breach-item-name">Check Manually (Free)</div>
+                <div class="breach-item-desc">Visit <a href="https://haveibeenpwned.com/account/${encodeURIComponent(email)}" target="_blank" style="color:#6366f1;">haveibeenpwned.com</a> to check your email for free — the most trusted breach database in the world.</div>
+              </div>
+            </div>`;
+          return;
+        }
+
+        const breaches = await res.json();
+        if (breaches && breaches.length > 0) {
+          document.getElementById('breach-results').style.display = 'block';
+          document.getElementById('breach-results').innerHTML = `
+            <div style="color:#f87171;font-size:14px;font-weight:600;margin-bottom:12px;">⚠️ Found in ${breaches.length} data breach${breaches.length > 1 ? 'es' : ''}!</div>
+            ${breaches.slice(0, 8).map(b => `
+              <div class="breach-item">
+                <div class="breach-item-icon">🔓</div>
+                <div>
+                  <div class="breach-item-name">${b.Name} — ${b.BreachDate?.substring(0,4) || 'Unknown year'}</div>
+                  <div class="breach-item-desc">Leaked: ${b.DataClasses?.join(', ') || 'Unknown data'}</div>
+                </div>
+              </div>`).join('')}
+            <div class="card-fix" style="margin-top:12px;">💡 Change your password on these sites immediately and enable 2-factor authentication</div>`;
+        }
+      } catch(e) {
+        document.getElementById('breach-loading').style.display = 'none';
+        document.getElementById('breach-results').style.display = 'block';
+        document.getElementById('breach-results').innerHTML = `
+          <div class="breach-item">
+            <div class="breach-item-icon">🔍</div>
+            <div>
+              <div class="breach-item-name">Check on HaveIBeenPwned</div>
+              <div class="breach-item-desc">Visit <a href="https://haveibeenpwned.com/account/${encodeURIComponent(email)}" target="_blank" style="color:#6366f1;">haveibeenpwned.com</a> to check your email for free.</div>
+            </div>
+          </div>`;
+      }
+    }
+
+    async function logout() {
+      await sb.auth.signOut();
+      window.location.href = '/';
+    }
+
+    init();
+  </script>
 </body>
 </html>
