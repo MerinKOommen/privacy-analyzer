@@ -416,17 +416,15 @@
       }
     }
 
-    // Check if already logged in or handle OAuth callback
-    async function checkSession() {
-      // Handle OAuth hash in URL
-      if (window.location.hash && window.location.hash.includes('access_token')) {
-        const { data, error } = await sb.auth.getSession();
-        if (data?.session) {
-          window.location.href = '/dashboard';
-          return;
-        }
+    // Listen for auth state changes
+    sb.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        window.location.href = '/dashboard';
       }
-      // Normal session check
+    });
+
+    // Check if already logged in
+    async function checkSession() {
       const { data } = await sb.auth.getSession();
       if (data?.session) window.location.href = '/dashboard';
     }
