@@ -110,24 +110,9 @@
 
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-async function checkout() {
-  const res = await fetch('/create-order', { method: 'POST' });
-  const data = await res.json();
-  const options = {
-    key: data.keyId,
-    amount: data.amount,
-    currency: data.currency,
-    name: 'PrivacyAnalyzer',
-    description: 'Lifetime Access',
-    order_id: data.orderId,
-    handler: function(response) {
-      window.location.href = '/success';
-    },
-    theme: { color: '#7F77DD' }
-  };
-  const rzp = new Razorpay(options);
-  rzp.open();
-}
+  function checkout() {
+    window.location.href = '/login';
+  }
 </script>
 
 </body>
