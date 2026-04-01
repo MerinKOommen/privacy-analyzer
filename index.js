@@ -25,6 +25,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'landing.html'));
 });
 
+// Auth callback for Google OAuth
+app.get('/auth-callback', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'auth-callback.html'));
+});
+
 // Login page
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'login.html'));

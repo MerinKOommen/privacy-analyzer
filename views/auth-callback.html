@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Redirecting...</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #070b14; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .box { text-align: center; }
+    .spinner { width: 40px; height: 40px; border: 3px solid #1f2937; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    p { font-size: 14px; color: #6b7280; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="spinner"></div>
+    <p>Signing you in...</p>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const { createClient } = supabase;
+    const sb = createClient(
+      'https://xlxpixpvpwjjdwucojmb.supabase.co',
+      'sb_publishable_vlkhbSh5bF5BUoO65yzoLQ_-25i9e-S'
+    );
+
+    async function handleRedirect() {
+      const { data, error } = await sb.auth.getSession();
+      if (data?.session) {
+        window.location.href = '/dashboard';
+      } else {
+        await sb.auth.exchangeCodeForSession(window.location.href);
+        const { data: data2 } = await sb.auth.getSession();
+        if (data2?.session) {
+          window.location.href = '/dashboard';
+        } else {
+          window.location.href = '/login';
+        }
+      }
+    }
+
+    handleRedirect();
+  </script>
+</body>
+</html>
