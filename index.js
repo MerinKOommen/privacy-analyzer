@@ -1,8 +1,13 @@
- require('dotenv').config();
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const Razorpay = require('razorpay');
 const path = require('path');
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 const app = express();
 app.use(cors());
@@ -24,27 +29,20 @@ app.get('/success', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'success.html'));
 });
 
-// Create Stripe checkout session
-app.post('/create-checkout-session', async (req, res) => {
+// Create Razorpay order
+app.post('/create-order', async (req, res) => {
   try {
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [{
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: 'Privacy Analyzer — Lifetime Access',
-            description: 'Full access to the Privacy Analyzer tool',
-          },
-          unit_amount: 499, // $4.99
-        },
-        quantity: 1,
-      }],
-      mode: 'payment',
-      success_url: `${process.env.DOMAIN}/success`,
-      cancel_url: `${process.env.DOMAIN}/`,
+    const order = await razorpay.orders.create({
+      amount: 49900, // ₹499 in paise
+      currency: 'INR',
+      receipt: 'receipt_' + Date.now(),
     });
-    res.json({ url: session.url });
+    res.json({
+      orderId: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      keyId: process.env.RAZORPAY_KEY_ID,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
