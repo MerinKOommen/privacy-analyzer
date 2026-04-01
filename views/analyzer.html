@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Privacy Analyzer — Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #0f0f1a; color: #fff; }
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid #222; }
+    .logo { font-size: 20px; font-weight: bold; color: #7F77DD; }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+    h1 { font-size: 28px; margin-bottom: 8px; }
+    .sub { color: #aaa; margin-bottom: 30px; font-size: 15px; }
+    .score-wrap { text-align: center; margin: 30px 0; }
+    .score-circle { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 140px; height: 140px; border-radius: 50%; border: 6px solid #7F77DD; }
+    .score-num { font-size: 42px; font-weight: bold; color: #7F77DD; }
+    .score-lbl { font-size: 12px; color: #aaa; }
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+    .tab { padding: 8px 18px; border-radius: 20px; border: 1px solid #333; background: transparent; color: #aaa; cursor: pointer; font-size: 13px; }
+    .tab.active { background: #7F77DD; border-color: #7F77DD; color: #fff; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .card { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 16px 20px; margin-bottom: 12px; }
+    .card-label { font-size: 12px; color: #aaa; margin-bottom: 4px; }
+    .card-value { font-size: 15px; font-weight: bold; word-break: break-all; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; margin-top: 6px; }
+    .badge-red { background: #3a1a1a; color: #f09595; }
+    .badge-yellow { background: #2a2010; color: #FAC775; }
+    .badge-green { background: #1a2e1a; color: #C0DD97; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .metric { background: #1a1a2e; border-radius: 10px; padding: 16px; }
+    .metric-label { font-size: 12px; color: #aaa; margin-bottom: 6px; }
+    .metric-value { font-size: 22px; font-weight: bold; }
+    .tip { background: #1a1530; border-left: 3px solid #7F77DD; border-radius: 0 8px 8px 0; padding: 12px 16px; margin-top: 8px; font-size: 13px; color: #aaa; }
+    .scan-btn { display: block; width: 100%; padding: 12px; background: #7F77DD; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; margin-bottom: 24px; }
+    .scan-btn:hover { opacity: 0.85; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">🔒 PrivacyAnalyzer</div>
+  <span style="color:#aaa;font-size:13px;">Premium Access</span>
+</nav>
+
+<div class="wrap">
+  <h1>Your Privacy Report</h1>
+  <p class="sub">See what websites know about you in real time</p>
+
+  <div class="score-wrap">
+    <div class="score-circle">
+      <div class="score-num" id="score-num">–</div>
+      <div class="score-lbl">Privacy Score</div>
+    </div>
+  </div>
+
+  <button class="scan-btn" onclick="runScan()">Run Full Scan</button>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('fingerprint', this)">Fingerprint</button>
+    <button class="tab" onclick="showTab('ip', this)">IP & Location</button>
+    <button class="tab" onclick="showTab('storage', this)">Cookies & Storage</button>
+    <button class="tab" onclick="showTab('trackers', this)">Trackers</button>
+  </div>
+
+  <div id="fingerprint" class="section active">
+    <div class="grid2">
+      <div class="metric"><div class="metric-label">Browser</div><div class="metric-value" id="fp-browser">–</div></div>
+      <div class="metric"><div class="metric-label">OS</div><div class="metric-value" id="fp-os">–</div></div>
+    </div>
+    <div class="card"><div class="card-label">Screen Resolution</div><div class="card-value" id="fp-screen">–</div></div>
+    <div class="card"><div class="card-label">Timezone</div><div class="card-value" id="fp-tz">–</div></div>
+    <div class="card"><div class="card-label">Language</div><div class="card-value" id="fp-lang">–</div></div>
+    <div class="card"><div class="card-label">CPU Cores</div><div class="card-value" id="fp-cpu">–</div></div>
+    <div class="card">
+      <div class="card-label">Canvas Fingerprint</div>
+      <div class="card-value" id="fp-canvas">–</div>
+      <span class="badge badge-red" id="fp-canvas-risk" style="display:none">High Risk — Can track you</span>
+    </div>
+    <div class="tip">Canvas fingerprinting can identify you across websites even without cookies. Use Firefox + uBlock Origin to block it.</div>
+  </div>
+
+  <div id="ip" class="section">
+    <div class="card"><div class="card-label">Your IP Address</div><div class="card-value" id="ip-addr">–</div><span class="badge badge-red">Visible to every website</span></div>
+    <div class="card"><div class="card-label">Location</div><div class="card-value" id="ip-loc">–</div></div>
+    <div class="card"><div class="card-label">ISP</div><div class="card-value" id="ip-isp">–</div></div>
+    <div class="card"><div class="card-label">VPN Detected</div><div class="card-value" id="ip-vpn">–</div></div>
+    <div class="tip">Use a trusted VPN to hide your IP address and location from websites.</div>
+  </div>
+
+  <div id="storage" class="section">
+    <div class="grid2">
+      <div class="metric"><div class="metric-label">Cookies</div><div class="metric-value" id="st-cookies">–</div></div>
+      <div class="metric"><div class="metric-label">localStorage</div><div class="metric-value" id="st-ls">–</div></div>
+    </div>
+    <div class="card"><div class="card-label">sessionStorage items</div><div class="card-value" id="st-ss">–</div></div>
+    <div class="card"><div class="card-label">3rd-Party Trackers</div><div class="card-value" id="st-3p">–</div></div>
+    <div class="tip">Clear your cookies and localStorage regularly to reduce tracking data.</div>
+  </div>
+
+  <div id="trackers" class="section">
+    <div class="card"><div class="card-label">Do Not Track</div><div class="card-value" id="tr-dnt">–</div></div>
+    <div class="card">
+      <div class="card-label">WebRTC Leak Risk</div>
+      <div class="card-value" id="tr-webrtc">–</div>
+      <span class="badge badge-red" id="tr-webrtc-risk" style="display:none">Can expose your real IP</span>
+    </div>
+    <div class="card"><div class="card-label">Ad Blocker</div><div class="card-value" id="tr-adblock">–</div></div>
+    <div class="card"><div class="card-label">Battery API Exposed</div><div class="card-value" id="tr-battery">–</div></div>
+    <div class="tip">Disable WebRTC in your browser settings or install a WebRTC leak blocker extension.</div>
+  </div>
+</div>
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function set(id, val) { const el = document.getElementById(id); if(el) el.textContent = val; }
+
+function getBrowser(ua) {
+  if (ua.includes('Edg/')) return 'Edge';
+  if (ua.includes('Firefox')) return 'Firefox';
+  if (ua.includes('Chrome')) return 'Chrome';
+  if (ua.includes('Safari')) return 'Safari';
+  return 'Unknown';
+}
+
+function getOS(ua) {
+  if (ua.includes('Windows')) return 'Windows';
+  if (ua.includes('Mac')) return 'macOS';
+  if (ua.includes('Android')) return 'Android';
+  if (ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
+  if (ua.includes('Linux')) return 'Linux';
+  return 'Unknown';
+}
+
+async function runScan() {
+  let score = 100;
+  const ua = navigator.userAgent;
+  set('fp-browser', getBrowser(ua));
+  set('fp-os', getOS(ua));
+  set('fp-screen', screen.width + ' x ' + screen.height);
+  set('fp-tz', Intl.DateTimeFormat().resolvedOptions().timeZone);
+  set('fp-lang', navigator.language);
+  set('fp-cpu', navigator.hardwareConcurrency + ' cores');
+
+  try {
+    const c = document.createElement('canvas');
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#7F77DD'; ctx.fillRect(0,0,100,20);
+    ctx.fillStyle = '#fff'; ctx.font = '14px Arial'; ctx.fillText('test',2,2);
+    const fp = c.toDataURL().slice(-16);
+    set('fp-canvas', 'Hash: ' + fp);
+    document.getElementById('fp-canvas-risk').style.display = 'inline-block';
+    score -= 15;
+  } catch(e) { set('fp-canvas', 'Blocked (Good)'); }
+
+  try {
+    const r = await fetch('https://ipapi.co/json/');
+    const d = await r.json();
+    set('ip-addr', d.ip || '–');
+    set('ip-loc', [d.city, d.country_name].filter(Boolean).join(', '));
+    set('ip-isp', d.org || '–');
+    set('ip-vpn', d.proxy ? 'VPN Detected ✓' : 'No VPN Detected');
+    if (!d.proxy) score -= 20;
+  } catch(e) { set('ip-addr', 'Could not fetch'); }
+
+  set('st-cookies', document.cookie.split(';').filter(c=>c.trim()).length);
+  set('st-ls', localStorage.length);
+  set('st-ss', sessionStorage.length);
+  set('st-3p', document.cookie.includes('_ga') ? 'Google Analytics detected' : 'None detected');
+
+  set('tr-dnt', navigator.doNotTrack === '1' ? 'Enabled ✓' : 'Not set');
+  if (navigator.doNotTrack !== '1') score -= 5;
+
+  if (typeof RTCPeerConnection !== 'undefined') {
+    set('tr-webrtc', 'WebRTC is enabled');
+    document.getElementById('tr-webrtc-risk').style.display = 'inline-block';
+    score -= 15;
+  } else {
+    set('tr-webrtc', 'WebRTC disabled ✓');
+  }
+
+  try {
+    const el = document.createElement('div');
+    el.className = 'adsbox'; el.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px';
+    document.body.appendChild(el);
+    await new Promise(r => setTimeout(r, 100));
+    const blocked = el.offsetHeight === 0;
+    el.remove();
+    set('tr-adblock', blocked ? 'Ad Blocker Active ✓' : 'No Ad Blocker');
+    if (blocked) score += 10;
+  } catch(e) {}
+
+  set('tr-battery', typeof navigator.getBattery === 'function' ? 'Exposed (tracking risk)' : 'Not available');
+  if (typeof navigator.getBattery === 'function') score -= 5;
+
+  score = Math.max(0, Math.min(100, score));
+  document.getElementById('score-num').textContent = score;
+  const circle = document.querySelector('.score-circle');
+  circle.style.borderColor = score >= 70 ? '#639922' : score >= 40 ? '#BA7517' : '#E24B4A';
+  document.getElementById('score-num').style.color = score >= 70 ? '#639922' : score >= 40 ? '#BA7517' : '#E24B4A';
+}
+
+window.onload = runScan;
+</script>
+</body>
+</html>
