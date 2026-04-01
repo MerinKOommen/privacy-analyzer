@@ -7,77 +7,130 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: #070b14; color: #fff; min-height: 100vh; }
+    body { font-family: 'Inter', sans-serif; background: #070b14; color: #fff; min-height: 100vh; overflow-x: hidden; }
+
     .bg-grid {
       position: fixed; inset: 0;
       background-image:
         linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px);
-      background-size: 40px 40px; z-index: 0;
+      background-size: 40px 40px; z-index: 0; pointer-events: none;
     }
+    .orb { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.13; animation: float 8s ease-in-out infinite; z-index: 0; pointer-events: none; }
+    .orb1 { width: 500px; height: 500px; background: #6366f1; top: -150px; left: -150px; }
+    .orb2 { width: 350px; height: 350px; background: #06b6d4; bottom: -80px; right: -80px; animation-delay: 3s; }
+    .orb3 { width: 250px; height: 250px; background: #8b5cf6; top: 40%; left: 40%; animation-delay: 5s; }
+    @keyframes float { 0%,100%{transform:translate(0,0);} 50%{transform:translate(20px,-20px);} }
+
+    /* NAV */
     nav {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 32px; border-bottom: 1px solid #1f2937;
-      background: rgba(7,11,20,0.9); backdrop-filter: blur(10px);
       position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 40px; border-bottom: 1px solid #1f2937;
+      background: rgba(7,11,20,0.95); backdrop-filter: blur(12px);
     }
     .brand { display: flex; align-items: center; gap: 10px; }
-    .brand-icon { width: 32px; height: 32px; background: linear-gradient(135deg, #6366f1, #06b6d4); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-    .brand-name { font-size: 16px; font-weight: 600; }
+    .brand-icon { width: 34px; height: 34px; background: linear-gradient(135deg, #6366f1, #06b6d4); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+    .brand-name { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; }
     .nav-right { display: flex; align-items: center; gap: 12px; }
-    .user-badge { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: #0d1117; border: 1px solid #1f2937; border-radius: 8px; font-size: 13px; color: #9ca3af; }
-    .user-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; }
-    .logout-btn { padding: 6px 14px; background: transparent; border: 1px solid #374151; border-radius: 8px; color: #9ca3af; font-size: 13px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+    .user-badge { display: flex; align-items: center; gap: 8px; padding: 7px 14px; background: #0d1117; border: 1px solid #1f2937; border-radius: 8px; font-size: 13px; color: #9ca3af; }
+    .user-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; animation: pulse-dot 2s infinite; }
+    @keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+    .logout-btn { padding: 7px 16px; background: transparent; border: 1px solid #374151; border-radius: 8px; color: #9ca3af; font-size: 13px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
     .logout-btn:hover { border-color: #ef4444; color: #ef4444; }
-    .main { max-width: 1100px; margin: 0 auto; padding: 40px 24px; position: relative; z-index: 1; }
-    .score-section { display: flex; align-items: center; gap: 32px; margin-bottom: 32px; background: #0d1117; border: 1px solid #1f2937; border-radius: 16px; padding: 32px; }
-    .score-ring { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
-    .score-ring svg { transform: rotate(-90deg); }
-    .score-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
-    .score-num { font-size: 28px; font-weight: 700; }
-    .score-lbl { font-size: 10px; color: #6b7280; }
-    .score-info h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-    .score-info p { font-size: 14px; color: #6b7280; line-height: 1.6; }
-    .section-title { font-size: 13px; font-weight: 600; color: #6b7280; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 16px; }
-    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 32px; }
-    .card { background: #0d1117; border: 1px solid #1f2937; border-radius: 12px; padding: 20px; transition: border-color 0.2s; }
-    .card:hover { border-color: #374151; }
-    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .card-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-    .icon-blue { background: rgba(99,102,241,0.15); }
-    .icon-cyan { background: rgba(6,182,212,0.15); }
-    .icon-green { background: rgba(16,185,129,0.15); }
-    .icon-purple { background: rgba(139,92,246,0.15); }
-    .free-badge { font-size: 10px; padding: 3px 8px; background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); border-radius: 20px; }
-    .locked-badge { font-size: 10px; padding: 3px 8px; background: rgba(99,102,241,0.1); color: #6366f1; border: 1px solid rgba(99,102,241,0.2); border-radius: 20px; }
-    .card-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-    .card-value { font-size: 20px; font-weight: 700; color: #e5e7eb; margin-bottom: 4px; }
-    .card-sub { font-size: 12px; color: #4b5563; }
-    .locked-card { position: relative; overflow: hidden; }
-    .locked-card::after { content: ''; position: absolute; inset: 0; background: rgba(7,11,20,0.7); backdrop-filter: blur(3px); border-radius: 12px; }
-    .lock-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; }
-    .lock-icon { font-size: 24px; margin-bottom: 6px; }
-    .lock-text { font-size: 12px; color: #9ca3af; }
-    .upgrade-banner {
-      background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(6,182,212,0.1));
-      border: 1px solid rgba(99,102,241,0.3);
-      border-radius: 16px; padding: 32px;
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 32px;
+
+    /* MAIN LAYOUT — same as login: left panel + right panel */
+    .layout { display: flex; min-height: calc(100vh - 57px); position: relative; z-index: 1; }
+
+    /* LEFT — console + score (same as login left panel) */
+    .left-panel { width: 420px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; padding: 50px 48px; border-right: 1px solid #1f2937; }
+    .left-title { font-size: 32px; font-weight: 700; line-height: 1.2; letter-spacing: -0.8px; margin-bottom: 10px; }
+    .left-title span { background: linear-gradient(135deg, #6366f1, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .left-sub { font-size: 14px; color: #6b7280; line-height: 1.7; margin-bottom: 28px; }
+
+    .console {
+      background: #0d1117; border: 1px solid #1f2937; border-radius: 12px;
+      padding: 18px; font-family: 'Courier New', monospace; font-size: 12px; margin-bottom: 20px;
     }
-    .upgrade-left h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-    .upgrade-left p { font-size: 14px; color: #9ca3af; max-width: 500px; line-height: 1.6; }
-    .feature-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-    .feature-pill { font-size: 12px; padding: 4px 10px; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); border-radius: 20px; color: #a5b4fc; }
-    .upgrade-btn { padding: 14px 32px; background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; margin-left: 24px; }
+    .console-header { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #1f2937; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-red{background:#ef4444;} .dot-yellow{background:#f59e0b;} .dot-green{background:#10b981;}
+    .ctitle { color: #4b5563; font-size: 11px; margin-left: 8px; font-family: 'Inter', sans-serif; }
+    .cline { margin-bottom: 5px; opacity: 0; animation: fadeInLine 0.3s forwards; }
+    .cline.prompt::before { content: '$ '; color: #6366f1; }
+    .cline.out { color: #10b981; padding-left: 10px; }
+    .cline.warn { color: #f59e0b; padding-left: 10px; }
+    .cline.info { color: #06b6d4; padding-left: 10px; }
+    .cline.err { color: #ef4444; padding-left: 10px; }
+    @keyframes fadeInLine { from{opacity:0;transform:translateX(-4px);} to{opacity:1;transform:translateX(0);} }
+
+    /* Score ring */
+    .score-card { background: #0d1117; border: 1px solid #1f2937; border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 20px; }
+    .ring-wrap { position: relative; width: 90px; height: 90px; flex-shrink: 0; }
+    .ring-wrap svg { transform: rotate(-90deg); }
+    .ring-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+    .ring-num { font-size: 22px; font-weight: 700; }
+    .ring-lbl { font-size: 9px; color: #6b7280; }
+    .score-info h3 { font-size: 15px; font-weight: 600; margin-bottom: 5px; }
+    .score-info p { font-size: 12px; color: #6b7280; line-height: 1.5; }
+
+    /* RIGHT — dashboard content */
+    .right-panel { flex: 1; padding: 40px 40px; overflow-y: auto; }
+
+    .section-label { font-size: 11px; font-weight: 600; color: #6b7280; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; }
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 28px; }
+
+    .card { background: #0d1117; border: 1px solid #1f2937; border-radius: 12px; padding: 18px; transition: border-color 0.2s; }
+    .card:hover { border-color: #374151; }
+    .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .card-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .i-blue{background:rgba(99,102,241,0.15);} .i-cyan{background:rgba(6,182,212,0.15);} .i-green{background:rgba(16,185,129,0.15);} .i-purple{background:rgba(139,92,246,0.15);}
+    .b-free { font-size: 10px; padding: 2px 8px; background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); border-radius: 20px; }
+    .b-pro { font-size: 10px; padding: 2px 8px; background: rgba(99,102,241,0.1); color: #818cf8; border: 1px solid rgba(99,102,241,0.2); border-radius: 20px; }
+    .card-label { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+    .card-val { font-size: 17px; font-weight: 700; color: #f3f4f6; }
+    .card-sub { font-size: 11px; color: #4b5563; margin-top: 3px; }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; display: inline-block; margin-right: 5px; animation: pulse-dot 2s infinite; }
+
+    /* Locked premium cards */
+    .locked { position: relative; overflow: hidden; }
+    .locked::after { content: ''; position: absolute; inset: 0; background: rgba(7,11,20,0.78); backdrop-filter: blur(4px); border-radius: 12px; }
+    .lock-over { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
+    .lock-over .licon { font-size: 20px; }
+    .lock-over .ltxt { font-size: 11px; color: #9ca3af; }
+
+    /* Upgrade banner */
+    .upgrade-box {
+      background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(6,182,212,0.08));
+      border: 1px solid rgba(99,102,241,0.25); border-radius: 14px; padding: 28px;
+      display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 28px;
+    }
+    .upgrade-box h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .upgrade-box p { font-size: 13px; color: #9ca3af; line-height: 1.6; max-width: 480px; }
+    .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .pill { font-size: 11px; padding: 3px 10px; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); border-radius: 20px; color: #a5b4fc; }
+    .upgrade-right { flex-shrink: 0; text-align: center; }
+    .upgrade-btn {
+      display: block; padding: 13px 28px;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #fff; border: none; border-radius: 10px; font-size: 14px;
+      font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s;
+    }
     .upgrade-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-    .upgrade-price { font-size: 12px; color: #6b7280; text-align: center; margin-top: 6px; }
-    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; display: inline-block; margin-right: 6px; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+    .upgrade-price { font-size: 12px; color: #6b7280; margin-top: 6px; }
+
+    @media(max-width: 860px) {
+      .left-panel { display: none; }
+      .right-panel { padding: 24px 20px; }
+    }
   </style>
 </head>
 <body>
   <div class="bg-grid"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
   <nav>
     <div class="brand">
       <div class="brand-icon">🔒</div>
@@ -92,101 +145,124 @@
     </div>
   </nav>
 
-  <div class="main">
-    <div class="score-section">
-      <div class="score-ring">
-        <svg width="120" height="120" viewBox="0 0 120 120">
-          <circle cx="60" cy="60" r="50" fill="none" stroke="#1f2937" stroke-width="10"/>
-          <circle id="score-arc" cx="60" cy="60" r="50" fill="none" stroke="#6366f1" stroke-width="10" stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round"/>
-        </svg>
-        <div class="score-center">
-          <div class="score-num" id="score-display">–</div>
-          <div class="score-lbl">SCORE</div>
+  <div class="layout">
+
+    <!-- LEFT PANEL — same vibe as login -->
+    <div class="left-panel">
+      <h2 class="left-title">Your Privacy<br/><span>Live Report</span></h2>
+      <p class="left-sub">Real-time analysis of your digital footprint. See what every website knows about you.</p>
+
+      <div class="console">
+        <div class="console-header">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+          <span class="ctitle">privacy-scan — live</span>
+        </div>
+        <div id="console-out"></div>
+      </div>
+
+      <div class="score-card">
+        <div class="ring-wrap">
+          <svg width="90" height="90" viewBox="0 0 90 90">
+            <circle cx="45" cy="45" r="36" fill="none" stroke="#1f2937" stroke-width="8"/>
+            <circle id="score-arc" cx="45" cy="45" r="36" fill="none" stroke="#6366f1" stroke-width="8" stroke-dasharray="226" stroke-dashoffset="226" stroke-linecap="round"/>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-num" id="score-num">–</div>
+            <div class="ring-lbl">SCORE</div>
+          </div>
+        </div>
+        <div class="score-info">
+          <h3 id="score-title">Scanning...</h3>
+          <p id="score-desc">Analyzing your privacy exposure in real time.</p>
         </div>
       </div>
-      <div class="score-info">
-        <h2 id="score-title">Scanning your privacy...</h2>
-        <p id="score-desc">We are analyzing your browser, IP address, and tracking exposure right now.</p>
-      </div>
     </div>
 
-    <p class="section-title">Free Features</p>
-    <div class="cards-grid">
-      <div class="card">
-        <div class="card-header"><div class="card-icon icon-blue">🌍</div><span class="free-badge">Free</span></div>
-        <div class="card-title">Your IP Address</div>
-        <div class="card-value" id="ip-val"><span class="live-dot"></span>Fetching...</div>
-        <div class="card-sub" id="ip-loc">Detecting location...</div>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-icon icon-cyan">🖥️</div><span class="free-badge">Free</span></div>
-        <div class="card-title">Browser</div>
-        <div class="card-value" id="browser-val">–</div>
-        <div class="card-sub" id="os-val">–</div>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-icon icon-green">🍪</div><span class="free-badge">Free</span></div>
-        <div class="card-title">Cookies Found</div>
-        <div class="card-value" id="cookie-val">–</div>
-        <div class="card-sub">In your browser right now</div>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-icon icon-purple">📡</div><span class="free-badge">Free</span></div>
-        <div class="card-title">Do Not Track</div>
-        <div class="card-value" id="dnt-val">–</div>
-        <div class="card-sub">Browser privacy setting</div>
-      </div>
-    </div>
+    <!-- RIGHT PANEL — dashboard content -->
+    <div class="right-panel">
 
-    <div class="upgrade-banner">
-      <div class="upgrade-left">
-        <h3>Unlock Full Privacy Analysis</h3>
-        <p>Get the complete picture — canvas fingerprint, WebRTC leaks, tracker detection, storage analysis, and your full privacy score with detailed recommendations.</p>
-        <div class="feature-list">
-          <span class="feature-pill">Canvas Fingerprint</span>
-          <span class="feature-pill">WebRTC Leak Test</span>
-          <span class="feature-pill">Tracker Detection</span>
-          <span class="feature-pill">Full Privacy Score</span>
-          <span class="feature-pill">Storage Analysis</span>
-          <span class="feature-pill">Ad Block Check</span>
+      <p class="section-label">Free Features</p>
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-top"><div class="card-icon i-blue">🌍</div><span class="b-free">Free</span></div>
+          <div class="card-label">Your IP Address</div>
+          <div class="card-val" id="ip-val"><span class="live-dot"></span>Fetching...</div>
+          <div class="card-sub" id="ip-loc">Detecting location...</div>
+        </div>
+        <div class="card">
+          <div class="card-top"><div class="card-icon i-cyan">🖥️</div><span class="b-free">Free</span></div>
+          <div class="card-label">Browser</div>
+          <div class="card-val" id="browser-val">–</div>
+          <div class="card-sub" id="os-val">–</div>
+        </div>
+        <div class="card">
+          <div class="card-top"><div class="card-icon i-green">🍪</div><span class="b-free">Free</span></div>
+          <div class="card-label">Cookies Found</div>
+          <div class="card-val" id="cookie-val">–</div>
+          <div class="card-sub">In your browser now</div>
+        </div>
+        <div class="card">
+          <div class="card-top"><div class="card-icon i-purple">📡</div><span class="b-free">Free</span></div>
+          <div class="card-label">Do Not Track</div>
+          <div class="card-val" id="dnt-val">–</div>
+          <div class="card-sub">Browser setting</div>
         </div>
       </div>
-      <div>
-        <button class="upgrade-btn" onclick="upgrade()">Unlock Full Access</button>
-        <p class="upgrade-price">₹499 · One-time · Lifetime</p>
-      </div>
-    </div>
 
-    <p class="section-title">Premium Features</p>
-    <div class="cards-grid">
-      <div class="card locked-card">
-        <div class="card-header"><div class="card-icon icon-blue">🖼️</div><span class="locked-badge">Premium</span></div>
-        <div class="card-title">Canvas Fingerprint</div>
-        <div class="card-value">••••••••</div>
-        <div class="card-sub">Unique browser hash</div>
-        <div class="lock-overlay"><div class="lock-icon">🔒</div><div class="lock-text">Upgrade to unlock</div></div>
+      <!-- Upgrade banner -->
+      <div class="upgrade-box">
+        <div>
+          <h3>Unlock Full Privacy Analysis</h3>
+          <p>Canvas fingerprint, WebRTC leaks, tracker detection, storage analysis and a full detailed privacy report.</p>
+          <div class="pills">
+            <span class="pill">Canvas Fingerprint</span>
+            <span class="pill">WebRTC Leak Test</span>
+            <span class="pill">Tracker Detection</span>
+            <span class="pill">Full Privacy Score</span>
+            <span class="pill">Storage Analysis</span>
+          </div>
+        </div>
+        <div class="upgrade-right">
+          <button class="upgrade-btn" onclick="upgrade()">Unlock Full Access</button>
+          <p class="upgrade-price">₹499 · One-time · Lifetime</p>
+        </div>
       </div>
-      <div class="card locked-card">
-        <div class="card-header"><div class="card-icon icon-cyan">📶</div><span class="locked-badge">Premium</span></div>
-        <div class="card-title">WebRTC Leak</div>
-        <div class="card-value">••••••••</div>
-        <div class="card-sub">IP leak detection</div>
-        <div class="lock-overlay"><div class="lock-icon">🔒</div><div class="lock-text">Upgrade to unlock</div></div>
+
+      <!-- Locked premium -->
+      <p class="section-label">Premium Features</p>
+      <div class="cards-grid">
+        <div class="card locked">
+          <div class="card-top"><div class="card-icon i-blue">🖼️</div><span class="b-pro">Premium</span></div>
+          <div class="card-label">Canvas Fingerprint</div>
+          <div class="card-val">••••••••</div>
+          <div class="card-sub">Unique browser hash</div>
+          <div class="lock-over"><span class="licon">🔒</span><p class="ltxt">Upgrade to unlock</p></div>
+        </div>
+        <div class="card locked">
+          <div class="card-top"><div class="card-icon i-cyan">📶</div><span class="b-pro">Premium</span></div>
+          <div class="card-label">WebRTC Leak</div>
+          <div class="card-val">••••••••</div>
+          <div class="card-sub">IP leak detection</div>
+          <div class="lock-over"><span class="licon">🔒</span><p class="ltxt">Upgrade to unlock</p></div>
+        </div>
+        <div class="card locked">
+          <div class="card-top"><div class="card-icon i-green">🕵️</div><span class="b-pro">Premium</span></div>
+          <div class="card-label">Tracker Detection</div>
+          <div class="card-val">••••••••</div>
+          <div class="card-sub">3rd party trackers</div>
+          <div class="lock-over"><span class="licon">🔒</span><p class="ltxt">Upgrade to unlock</p></div>
+        </div>
+        <div class="card locked">
+          <div class="card-top"><div class="card-icon i-purple">💾</div><span class="b-pro">Premium</span></div>
+          <div class="card-label">Storage Analysis</div>
+          <div class="card-val">••••••••</div>
+          <div class="card-sub">localStorage & sessions</div>
+          <div class="lock-over"><span class="licon">🔒</span><p class="ltxt">Upgrade to unlock</p></div>
+        </div>
       </div>
-      <div class="card locked-card">
-        <div class="card-header"><div class="card-icon icon-green">🕵️</div><span class="locked-badge">Premium</span></div>
-        <div class="card-title">Tracker Detection</div>
-        <div class="card-value">••••••••</div>
-        <div class="card-sub">3rd party trackers</div>
-        <div class="lock-overlay"><div class="lock-icon">🔒</div><div class="lock-text">Upgrade to unlock</div></div>
-      </div>
-      <div class="card locked-card">
-        <div class="card-header"><div class="card-icon icon-purple">💾</div><span class="locked-badge">Premium</span></div>
-        <div class="card-title">Storage Analysis</div>
-        <div class="card-value">••••••••</div>
-        <div class="card-sub">localStorage & sessions</div>
-        <div class="lock-overlay"><div class="lock-icon">🔒</div><div class="lock-text">Upgrade to unlock</div></div>
-      </div>
+
     </div>
   </div>
 
@@ -198,6 +274,35 @@
     const { createClient } = supabase;
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let currentUser = null;
+
+    // Console animation
+    const lines = [
+      { text: 'privacy-scan --start', type: 'prompt', delay: 400 },
+      { text: 'Session authenticated ✓', type: 'out', delay: 1000 },
+      { text: 'Scanning browser fingerprint...', type: 'info', delay: 1600 },
+      { text: 'IP address exposed to all sites', type: 'warn', delay: 2200 },
+      { text: 'Canvas fingerprint detected!', type: 'err', delay: 2800 },
+      { text: 'WebRTC leak risk found', type: 'err', delay: 3400 },
+      { text: '7 third-party trackers active', type: 'err', delay: 4000 },
+      { text: 'Generating privacy report...', type: 'info', delay: 4600 },
+      { text: 'Upgrade to see full details', type: 'warn', delay: 5200 },
+    ];
+
+    function runConsole() {
+      const out = document.getElementById('console-out');
+      out.innerHTML = '';
+      lines.forEach(l => {
+        setTimeout(() => {
+          const el = document.createElement('div');
+          el.className = `cline ${l.type}`;
+          el.textContent = l.text;
+          out.appendChild(el);
+          out.scrollTop = out.scrollHeight;
+        }, l.delay);
+      });
+    }
+    runConsole();
+    setInterval(runConsole, 8000);
 
     async function init() {
       const { data } = await sb.auth.getSession();
@@ -214,7 +319,6 @@
       if (ua.includes('Safari')) return 'Safari';
       return 'Unknown';
     }
-
     function getOS(ua) {
       if (ua.includes('Windows')) return 'Windows';
       if (ua.includes('Mac')) return 'macOS';
@@ -238,49 +342,42 @@
       } catch(e) {
         document.getElementById('ip-val').textContent = 'Could not fetch';
       }
-      let score = 50;
+      let score = 45;
       if (navigator.doNotTrack === '1') score += 10;
       animateScore(score);
     }
 
     function animateScore(score) {
       const arc = document.getElementById('score-arc');
-      const display = document.getElementById('score-display');
       arc.style.transition = 'stroke-dashoffset 1.2s ease';
-      arc.style.strokeDashoffset = 314 - (score / 100) * 314;
+      arc.style.strokeDashoffset = 226 - (score / 100) * 226;
       arc.style.stroke = score >= 70 ? '#10b981' : score >= 40 ? '#f59e0b' : '#ef4444';
       let cur = 0;
       const step = setInterval(() => {
         cur = Math.min(cur + 2, score);
-        display.textContent = cur;
+        document.getElementById('score-num').textContent = cur;
         if (cur >= score) clearInterval(step);
       }, 20);
       document.getElementById('score-title').textContent = score >= 70 ? 'Good Privacy' : score >= 40 ? 'Moderate Risk' : 'High Risk!';
-      document.getElementById('score-desc').textContent = 'Upgrade to see your full privacy report with detailed recommendations.';
+      document.getElementById('score-desc').textContent = 'Upgrade to see your complete privacy report.';
     }
 
     async function upgrade() {
       const res = await fetch('/create-order', { method: 'POST' });
       const data = await res.json();
       const options = {
-        key: data.keyId,
-        amount: data.amount,
-        currency: data.currency,
-        name: 'PrivacyAnalyzer',
-        description: 'Lifetime Access',
-        order_id: data.orderId,
+        key: data.keyId, amount: data.amount, currency: data.currency,
+        name: 'PrivacyAnalyzer', description: 'Lifetime Access', order_id: data.orderId,
         handler: async function(response) {
           await fetch('/payment-success', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: currentUser.id, email: currentUser.email })
           });
           window.location.href = '/analyzer';
         },
         theme: { color: '#6366f1' }
       };
-      const rzp = new Razorpay(options);
-      rzp.open();
+      new Razorpay(options).open();
     }
 
     async function logout() {
