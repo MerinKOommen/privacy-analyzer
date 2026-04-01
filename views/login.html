@@ -301,7 +301,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = 'https://xlxpixpvpwjjdwucojmb.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_vlkhbSh5bF5BUoO65yzoLQ_-25i9e-S';
+    const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
     const { createClient } = supabase;
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -360,7 +360,7 @@
     async function loginWithGoogle() {
       const { error } = await sb.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin + '/dashboard' }
+        options: { redirectTo: 'https://privacy-analyzer-gj78.onrender.com/dashboard' }
       });
       if (error) showStatus('email-status', error.message, 'error');
     }
