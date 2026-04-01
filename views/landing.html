@@ -1,119 +1,248 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Privacy Analyzer</title>
+  <title>PrivacyAnalyzer — Know What the Internet Knows About You</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; background: #0f0f1a; color: #fff; }
+    body { font-family: 'Inter', sans-serif; background: #070b14; color: #fff; overflow-x: hidden; }
 
-    /* NAVBAR */
-    nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid #222; }
-    .logo { font-size: 20px; font-weight: bold; color: #7F77DD; }
-    .nav-btn { background: #7F77DD; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+    .bg-grid {
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px);
+      background-size: 40px 40px; z-index: 0; pointer-events: none;
+    }
+    .orb { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.13; animation: float 8s ease-in-out infinite; z-index: 0; pointer-events: none; }
+    .orb1 { width: 500px; height: 500px; background: #6366f1; top: -150px; left: -150px; }
+    .orb2 { width: 350px; height: 350px; background: #06b6d4; bottom: -80px; right: -80px; animation-delay: 3s; }
+    .orb3 { width: 250px; height: 250px; background: #8b5cf6; top: 50%; left: 50%; animation-delay: 5s; }
+    @keyframes float { 0%,100%{transform:translate(0,0);} 50%{transform:translate(20px,-20px);} }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 48px; border-bottom: 1px solid #1f2937;
+      background: rgba(7,11,20,0.95); backdrop-filter: blur(12px);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-icon { width: 34px; height: 34px; background: linear-gradient(135deg, #6366f1, #06b6d4); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+    .brand-name { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; }
+    .nav-links { display: flex; align-items: center; gap: 8px; }
+    .nav-btn { padding: 8px 20px; background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+    .nav-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .nav-login { padding: 8px 16px; background: transparent; border: 1px solid #374151; border-radius: 8px; color: #9ca3af; font-size: 14px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; margin-right: 4px; }
+    .nav-login:hover { border-color: #6366f1; color: #fff; }
 
     /* HERO */
-    .hero { text-align: center; padding: 100px 20px 60px; }
-    .hero h1 { font-size: 48px; font-weight: bold; margin-bottom: 20px; line-height: 1.2; }
-    .hero h1 span { color: #7F77DD; }
-    .hero p { font-size: 18px; color: #aaa; max-width: 600px; margin: 0 auto 40px; }
-    .hero-btn { background: #7F77DD; color: #fff; border: none; padding: 16px 40px; border-radius: 10px; font-size: 18px; cursor: pointer; transition: opacity 0.2s; }
-    .hero-btn:hover { opacity: 0.85; }
-    .price-tag { margin-top: 16px; color: #aaa; font-size: 14px; }
+    .hero { position: relative; z-index: 1; display: flex; align-items: center; min-height: calc(100vh - 65px); padding: 60px 48px; gap: 60px; }
+    .hero-left { flex: 1; max-width: 580px; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25); border-radius: 20px; font-size: 12px; color: #a5b4fc; margin-bottom: 28px; }
+    .hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #6366f1; animation: pulse-dot 2s infinite; }
+    @keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+    h1 { font-size: 56px; font-weight: 800; line-height: 1.1; letter-spacing: -2px; margin-bottom: 20px; }
+    h1 .grad { background: linear-gradient(135deg, #6366f1, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-sub { font-size: 17px; color: #6b7280; line-height: 1.7; margin-bottom: 36px; max-width: 480px; }
+    .hero-btns { display: flex; align-items: center; gap: 12px; margin-bottom: 48px; }
+    .btn-primary { padding: 14px 32px; background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
+    .btn-secondary { padding: 14px 24px; background: transparent; border: 1px solid #374151; border-radius: 10px; color: #9ca3af; font-size: 15px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+    .btn-secondary:hover { border-color: #6366f1; color: #fff; }
+    .hero-stats { display: flex; gap: 32px; }
+    .stat { }
+    .stat-num { font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #6366f1, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .stat-lbl { font-size: 12px; color: #4b5563; margin-top: 2px; }
+
+    /* Hero right — console */
+    .hero-right { flex-shrink: 0; width: 440px; }
+    .console { background: #0d1117; border: 1px solid #1f2937; border-radius: 14px; padding: 20px; font-family: 'Courier New', monospace; font-size: 12.5px; }
+    .console-header { display: flex; align-items: center; gap: 6px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #1f2937; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-red{background:#ef4444;} .dot-yellow{background:#f59e0b;} .dot-green{background:#10b981;}
+    .ctitle { color: #4b5563; font-size: 11px; margin-left: 8px; font-family: 'Inter', sans-serif; }
+    .cline { margin-bottom: 6px; opacity: 0; animation: fadeInLine 0.3s forwards; }
+    .cline.prompt::before { content: '$ '; color: #6366f1; }
+    .cline.out { color: #10b981; padding-left: 12px; }
+    .cline.warn { color: #f59e0b; padding-left: 12px; }
+    .cline.info { color: #06b6d4; padding-left: 12px; }
+    .cline.err { color: #ef4444; padding-left: 12px; }
+    @keyframes fadeInLine { from{opacity:0;transform:translateX(-4px);} to{opacity:1;transform:translateX(0);} }
 
     /* FEATURES */
-    .features { padding: 80px 40px; max-width: 1000px; margin: 0 auto; }
-    .features h2 { text-align: center; font-size: 32px; margin-bottom: 50px; }
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
-    .card { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 28px 20px; text-align: center; }
-    .card-icon { font-size: 36px; margin-bottom: 16px; }
-    .card h3 { font-size: 16px; margin-bottom: 10px; color: #7F77DD; }
-    .card p { font-size: 14px; color: #aaa; line-height: 1.6; }
+    .features { position: relative; z-index: 1; padding: 80px 48px; border-top: 1px solid #1f2937; }
+    .features-label { text-align: center; font-size: 11px; font-weight: 600; color: #6b7280; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px; }
+    .features-title { text-align: center; font-size: 36px; font-weight: 700; letter-spacing: -0.8px; margin-bottom: 48px; }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; max-width: 1000px; margin: 0 auto; }
+    .feat-card { background: #0d1117; border: 1px solid #1f2937; border-radius: 14px; padding: 24px; transition: border-color 0.2s, transform 0.2s; }
+    .feat-card:hover { border-color: #6366f1; transform: translateY(-3px); }
+    .feat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 16px; }
+    .fi-blue{background:rgba(99,102,241,0.15);} .fi-cyan{background:rgba(6,182,212,0.15);} .fi-green{background:rgba(16,185,129,0.15);} .fi-purple{background:rgba(139,92,246,0.15);}
+    .feat-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+    .feat-desc { font-size: 13px; color: #6b7280; line-height: 1.6; }
 
     /* PRICING */
-    .pricing { text-align: center; padding: 80px 20px; background: #0a0a14; }
-    .pricing h2 { font-size: 32px; margin-bottom: 40px; }
-    .price-box { display: inline-block; background: #1a1a2e; border: 2px solid #7F77DD; border-radius: 16px; padding: 40px 60px; }
-    .price-amount { font-size: 56px; font-weight: bold; color: #7F77DD; }
-    .price-period { font-size: 16px; color: #aaa; margin-bottom: 24px; }
-    .price-features { list-style: none; margin-bottom: 32px; text-align: left; }
-    .price-features li { padding: 8px 0; color: #ccc; font-size: 15px; }
-    .price-features li::before { content: "✓ "; color: #7F77DD; font-weight: bold; }
-    .buy-btn { background: #7F77DD; color: #fff; border: none; padding: 16px 48px; border-radius: 10px; font-size: 18px; cursor: pointer; width: 100%; transition: opacity 0.2s; }
-    .buy-btn:hover { opacity: 0.85; }
+    .pricing { position: relative; z-index: 1; padding: 80px 48px; border-top: 1px solid #1f2937; text-align: center; }
+    .pricing-label { font-size: 11px; font-weight: 600; color: #6b7280; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px; }
+    .pricing-title { font-size: 36px; font-weight: 700; letter-spacing: -0.8px; margin-bottom: 48px; }
+    .price-card { display: inline-block; background: #0d1117; border: 1px solid rgba(99,102,241,0.4); border-radius: 20px; padding: 48px; max-width: 420px; width: 100%; }
+    .price-badge { display: inline-block; padding: 4px 14px; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); border-radius: 20px; font-size: 12px; color: #a5b4fc; margin-bottom: 20px; }
+    .price-amount { font-size: 60px; font-weight: 800; letter-spacing: -2px; background: linear-gradient(135deg, #6366f1, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .price-period { font-size: 14px; color: #6b7280; margin-bottom: 32px; }
+    .price-features { list-style: none; text-align: left; margin-bottom: 32px; }
+    .price-features li { padding: 10px 0; border-bottom: 1px solid #1f2937; font-size: 14px; color: #d1d5db; display: flex; align-items: center; gap: 10px; }
+    .price-features li:last-child { border-bottom: none; }
+    .check { color: #10b981; font-size: 16px; }
+    .price-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+    .price-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .price-note { font-size: 12px; color: #4b5563; margin-top: 14px; }
 
     /* FOOTER */
-    footer { text-align: center; padding: 30px; color: #555; font-size: 14px; border-top: 1px solid #222; }
+    footer { position: relative; z-index: 1; text-align: center; padding: 32px; border-top: 1px solid #1f2937; font-size: 13px; color: #4b5563; }
+
+    @media(max-width: 900px) {
+      .hero { flex-direction: column; padding: 40px 24px; min-height: auto; }
+      .hero-right { width: 100%; }
+      h1 { font-size: 38px; }
+      .features, .pricing { padding: 60px 24px; }
+      nav { padding: 14px 24px; }
+    }
   </style>
 </head>
 <body>
+  <div class="bg-grid"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
 
   <nav>
-    <div class="logo">🔒 PrivacyAnalyzer</div>
-    <button class="nav-btn" onclick="checkout()">Get Access — $4.99</button>
+    <div class="brand">
+      <div class="brand-icon">🔒</div>
+      <span class="brand-name">PrivacyAnalyzer</span>
+    </div>
+    <div class="nav-links">
+      <button class="nav-login" onclick="window.location.href='/login'">Sign in</button>
+      <button class="nav-btn" onclick="window.location.href='/login'">Get Started Free</button>
+    </div>
   </nav>
 
+  <!-- HERO -->
   <section class="hero">
-    <h1>See What Websites<br/>Know About <span>You</span></h1>
-    <p>Instantly analyze your browser fingerprint, IP address, cookies, trackers, and privacy risks — all in one place.</p>
-    <button class="hero-btn" onclick="checkout()">Analyze My Privacy Now</button>
-    <p class="price-tag">One-time payment · Lifetime access · No subscription</p>
+    <div class="hero-left">
+      <div class="hero-badge">
+        <div class="hero-badge-dot"></div>
+        Real-time privacy analysis
+      </div>
+      <h1>Know What the<br/>Internet Knows<br/>About <span class="grad">You</span></h1>
+      <p class="hero-sub">Instantly analyze your browser fingerprint, IP address, cookies, and trackers. Stay invisible online.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="window.location.href='/login'">Start Free Analysis</button>
+        <button class="btn-secondary" onclick="document.querySelector('.features').scrollIntoView({behavior:'smooth'})">See Features</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-num">10+</div><div class="stat-lbl">Privacy checks</div></div>
+        <div class="stat"><div class="stat-num">100%</div><div class="stat-lbl">Browser-based</div></div>
+        <div class="stat"><div class="stat-num">Real-time</div><div class="stat-lbl">Live scanning</div></div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="console">
+        <div class="console-header">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+          <span class="ctitle">privacy-scan — terminal</span>
+        </div>
+        <div id="console-out"></div>
+      </div>
+    </div>
   </section>
 
+  <!-- FEATURES -->
   <section class="features">
-    <h2>What You Get</h2>
-    <div class="cards">
-      <div class="card">
-        <div class="card-icon">🖥️</div>
-        <h3>Browser Fingerprint</h3>
-        <p>See exactly what your browser reveals — OS, screen size, fonts, canvas hash and more.</p>
+    <p class="features-label">What we scan</p>
+    <h2 class="features-title">Complete Privacy Analysis</h2>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon fi-blue">🖥️</div>
+        <div class="feat-title">Browser Fingerprint</div>
+        <div class="feat-desc">See your unique browser signature — OS, fonts, canvas hash, screen size and more.</div>
       </div>
-      <div class="card">
-        <div class="card-icon">🌍</div>
-        <h3>IP & Location</h3>
-        <p>Find out your public IP, city, ISP and whether your VPN is actually working.</p>
+      <div class="feat-card">
+        <div class="feat-icon fi-cyan">🌍</div>
+        <div class="feat-title">IP & Location</div>
+        <div class="feat-desc">Find your public IP, city, ISP and check if your VPN is actually working.</div>
       </div>
-      <div class="card">
-        <div class="card-icon">🍪</div>
-        <h3>Cookies & Storage</h3>
-        <p>Discover what data websites are storing in your browser right now.</p>
+      <div class="feat-card">
+        <div class="feat-icon fi-green">🍪</div>
+        <div class="feat-title">Cookies & Storage</div>
+        <div class="feat-desc">Discover what data websites are storing in your browser right now.</div>
       </div>
-      <div class="card">
-        <div class="card-icon">📡</div>
-        <h3>Tracker Detection</h3>
-        <p>Check for WebRTC leaks, ad trackers, and dangerous browser permissions.</p>
+      <div class="feat-card">
+        <div class="feat-icon fi-purple">📡</div>
+        <div class="feat-title">Tracker Detection</div>
+        <div class="feat-desc">Check for WebRTC leaks, ad trackers, and dangerous browser permissions.</div>
       </div>
     </div>
   </section>
 
+  <!-- PRICING -->
   <section class="pricing">
-    <h2>Simple Pricing</h2>
-    <div class="price-box">
-      <div class="price-amount">$4.99</div>
-      <div class="price-period">One-time · Lifetime Access</div>
+    <p class="pricing-label">Simple pricing</p>
+    <h2 class="pricing-title">One Price. Full Access.</h2>
+    <div class="price-card">
+      <div class="price-badge">Lifetime Access</div>
+      <div class="price-amount">₹499</div>
+      <div class="price-period">One-time payment · No subscription</div>
       <ul class="price-features">
-        <li>Full Privacy Analysis</li>
-        <li>Browser Fingerprint Report</li>
-        <li>IP & Location Check</li>
-        <li>Cookie & Storage Scan</li>
-        <li>Tracker Detection</li>
-        <li>Privacy Score</li>
+        <li><span class="check">✓</span> Full Browser Fingerprint Report</li>
+        <li><span class="check">✓</span> IP & Location Analysis</li>
+        <li><span class="check">✓</span> Cookie & Storage Scanner</li>
+        <li><span class="check">✓</span> WebRTC Leak Detection</li>
+        <li><span class="check">✓</span> Tracker & Ad Detection</li>
+        <li><span class="check">✓</span> Full Privacy Score</li>
+        <li><span class="check">✓</span> Lifetime Access</li>
       </ul>
-      <button class="buy-btn" onclick="checkout()">Get Lifetime Access</button>
+      <button class="price-btn" onclick="window.location.href='/login'">Get Full Access</button>
+      <p class="price-note">Login first → then unlock with one-time payment</p>
     </div>
   </section>
 
-  <footer>
-    © 2025 PrivacyAnalyzer · Your privacy is our priority
-  </footer>
+  <footer>© 2025 PrivacyAnalyzer · Your privacy is our priority</footer>
 
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script>
-  function checkout() {
-    window.location.href = '/login';
-  }
-</script>
+  <script>
+    const lines = [
+      { text: 'privacy-scan --init', type: 'prompt', delay: 500 },
+      { text: 'Initializing scanner...', type: 'info', delay: 1200 },
+      { text: 'Loading fingerprint module ✓', type: 'out', delay: 1800 },
+      { text: 'Loading IP tracker module ✓', type: 'out', delay: 2400 },
+      { text: 'Loading cookie scanner ✓', type: 'out', delay: 3000 },
+      { text: 'WARNING: WebRTC leak detected', type: 'warn', delay: 3600 },
+      { text: 'Canvas fingerprint exposed!', type: 'err', delay: 4200 },
+      { text: '3rd party trackers found: 7', type: 'err', delay: 4800 },
+      { text: 'Privacy score: 42/100 ⚠', type: 'warn', delay: 5400 },
+      { text: 'Login to run full scan...', type: 'info', delay: 6000 },
+    ];
 
+    function runConsole() {
+      const out = document.getElementById('console-out');
+      out.innerHTML = '';
+      lines.forEach(l => {
+        setTimeout(() => {
+          const el = document.createElement('div');
+          el.className = `cline ${l.type}`;
+          el.textContent = l.text;
+          out.appendChild(el);
+          out.scrollTop = out.scrollHeight;
+        }, l.delay);
+      });
+    }
+    runConsole();
+    setInterval(runConsole, 9000);
+  </script>
 </body>
 </html>
