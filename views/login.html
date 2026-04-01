@@ -416,10 +416,21 @@
       }
     }
 
-    // Check if already logged in
-    sb.auth.getSession().then(({ data }) => {
-      if (data.session) window.location.href = '/dashboard';
-    });
+    // Check if already logged in or handle OAuth callback
+    async function checkSession() {
+      // Handle OAuth hash in URL
+      if (window.location.hash && window.location.hash.includes('access_token')) {
+        const { data, error } = await sb.auth.getSession();
+        if (data?.session) {
+          window.location.href = '/dashboard';
+          return;
+        }
+      }
+      // Normal session check
+      const { data } = await sb.auth.getSession();
+      if (data?.session) window.location.href = '/dashboard';
+    }
+    checkSession();
   </script>
 </body>
 </html>
