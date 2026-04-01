@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PrivacyAnalyzer — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #070b14; color: #fff; min-height: 100vh; }
+
+    .bg-grid {
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px);
+      background-size: 40px 40px; z-index: 0;
+    }
+
+    /* NAV */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px; border-bottom: 1px solid #1f2937;
+      background: rgba(7,11,20,0.9); backdrop-filter: blur(10px);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-icon { width: 32px; height: 32px; background: linear-gradient(135deg, #6366f1, #06b6d4); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .brand-name { font-size: 16px; font-weight: 600; }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .user-badge { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: #0d1117; border: 1px solid #1f2937; border-radius: 8px; font-size: 13px; color: #9ca3af; }
+    .user-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; }
+    .logout-btn { padding: 6px 14px; background: transparent; border: 1px solid #374151; border-radius: 8px; color: #9ca3af; font-size: 13px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+    .logout-btn:hover { border-color: #ef4444; color: #ef4444; }
+
+    /* MAIN */
+    .main { max-width: 1100px; margin: 0 auto; padding: 40px 24px; position: relative; z-index: 1; }
+
+    /* Score section */
+    .score-section { display: flex; align-items: center; gap: 32px; margin-bottom: 32px; background: #0d1117; border: 1px solid #1f2937; border-radius: 16px; padding: 32px; }
+    .score-ring { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
+    .score-ring svg { transform: rotate(-90deg); }
+    .score-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+    .score-num { font-size: 28px; font-weight: 700; }
+    .score-lbl { font-size: 10px; color: #6b7280; }
+    .score-info h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .score-info p { font-size: 14px; color: #6b7280; line-height: 1.6; }
+
+    /* Free features grid */
+    .section-title { font-size: 13px; font-weight: 600; color: #6b7280; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 16px; }
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .card { background: #0d1117; border: 1px solid #1f2937; border-radius: 12px; padding: 20px; transition: border-color 0.2s; }
+    .card:hover { border-color: #374151; }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .card-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .icon-blue { background: rgba(99,102,241,0.15); }
+    .icon-cyan { background: rgba(6,182,212,0.15); }
+    .icon-green { background: rgba(16,185,129,0.15); }
+    .icon-purple { background: rgba(139,92,246,0.15); }
+    .free-badge { font-size: 10px; padding: 3px 8px; background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); border-radius: 20px; }
+    .locked-badge { font-size: 10px; padding: 3px 8px; background: rgba(99,102,241,0.1); color: #6366f1; border: 1px solid rgba(99,102,241,0.2); border-radius: 20px; }
+    .card-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .card-value { font-size: 20px; font-weight: 700; color: #e5e7eb; margin-bottom: 4px; }
+    .card-sub { font-size: 12px; color: #4b5563; }
+
+    /* Locked overlay */
+    .locked-card { position: relative; overflow: hidden; }
+    .locked-card::after { content: ''; position: absolute; inset: 0; background: rgba(7,11,20,0.7); backdrop-filter: blur(3px); border-radius: 12px; }
+    .lock-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; }
+    .lock-icon { font-size: 24px; margin-bottom: 6px; }
+    .lock-text { font-size: 12px; color: #9ca3af; }
+
+    /* Upgrade banner */
+    .upgrade-banner {
+      background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(6,182,212,0.1));
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 16px; padding: 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    .upgrade-left h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .upgrade-left p { font-size: 14px; color: #9ca3af; max-width: 500px; line-height: 1.6; }
+    .feature-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .feature-pill { font-size: 12px; padding: 4px 10px; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); border-radius: 20px; color: #a5b4fc; }
+    .upgrade-btn {
+      padding: 14px 32px; background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #fff; border: none; border-radius: 10px; font-size: 15px;
+      font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif;
+      white-space: nowrap; transition: all 0.2s; flex-shrink: 0; margin-left: 24px;
+    }
+    .upgrade-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .upgrade-price { font-size: 12px; color: #6b7280; text-align: center; margin-top: 6px; }
+
+    /* IP card live */
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; display: inline-block; margin-right: 6px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <nav>
+    <div class="brand">
+      <div class="brand-icon">🔒</div>
+      <span class="brand-name">PrivacyAnalyzer</span>
+    </div>
+    <div class="nav-right">
+      <div class="user-badge">
+        <div class="user-dot"></div>
+        <span id="user-email">Loading...</span>
+      </div>
+      <button class="logout-btn" onclick="logout()">Sign out</button>
+    </div>
+  </nav>
+
+  <div class="main">
+
+    <!-- Score -->
+    <div class="score-section">
+      <div class="score-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#1f2937" stroke-width="10"/>
+          <circle id="score-arc" cx="60" cy="60" r="50" fill="none" stroke="#6366f1" stroke-width="10" stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round"/>
+        </svg>
+        <div class="score-center">
+          <div class="score-num" id="score-display">–</div>
+          <div class="score-lbl">SCORE</div>
+        </div>
+      </div>
+      <div class="score-info">
+        <h2 id="score-title">Scanning your privacy...</h2>
+        <p id="score-desc">We're analyzing your browser, IP address, and tracking exposure right now.</p>
+      </div>
+    </div>
+
+    <!-- Free features -->
+    <p class="section-title">Free Features</p>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-blue">🌍</div>
+          <span class="free-badge">Free</span>
+        </div>
+        <div class="card-title">Your IP Address</div>
+        <div class="card-value" id="ip-val"><span class="live-dot"></span>Fetching...</div>
+        <div class="card-sub" id="ip-loc">Detecting location...</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-cyan">🖥️</div>
+          <span class="free-badge">Free</span>
+        </div>
+        <div class="card-title">Browser</div>
+        <div class="card-value" id="browser-val">–</div>
+        <div class="card-sub" id="os-val">–</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-green">🍪</div>
+          <span class="free-badge">Free</span>
+        </div>
+        <div class="card-title">Cookies Found</div>
+        <div class="card-value" id="cookie-val">–</div>
+        <div class="card-sub">In your browser right now</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-purple">📡</div>
+          <span class="free-badge">Free</span>
+        </div>
+        <div class="card-title">Do Not Track</div>
+        <div class="card-value" id="dnt-val">–</div>
+        <div class="card-sub">Browser privacy setting</div>
+      </div>
+    </div>
+
+    <!-- Upgrade banner -->
+    <div class="upgrade-banner">
+      <div class="upgrade-left">
+        <h3>Unlock Full Privacy Analysis</h3>
+        <p>Get the complete picture — canvas fingerprint, WebRTC leaks, tracker detection, storage analysis, and your full privacy score with detailed recommendations.</p>
+        <div class="feature-list">
+          <span class="feature-pill">Canvas Fingerprint</span>
+          <span class="feature-pill">WebRTC Leak Test</span>
+          <span class="feature-pill">Tracker Detection</span>
+          <span class="feature-pill">Full Privacy Score</span>
+          <span class="feature-pill">Storage Analysis</span>
+          <span class="feature-pill">Ad Block Check</span>
+        </div>
+      </div>
+      <div>
+        <button class="upgrade-btn" onclick="upgrade()">Unlock Full Access</button>
+        <p class="upgrade-price">₹499 · One-time · Lifetime</p>
+      </div>
+    </div>
+
+    <!-- Locked features -->
+    <p class="section-title">Premium Features</p>
+    <div class="cards-grid">
+      <div class="card locked-card">
+        <div class="card-header"><div class="card-icon icon-blue">🖼️</div><span class="locked-badge">Premium</span></div>
+        <div class="card-title">Canvas Fingerprint</div>
+        <div class="card-value">••••••••</div>
+        <div class="card-sub">Unique browser hash</div>
+        <div class="lock-overlay"><div class="lock-icon">🔒</div><div class="lock-text">Upgrade to unlock</div></div>
+      </div>
+
+      <div class="card locked-card">
+        <div class="card-header"><div class="card-icon icon-cyan">📶</div><span class="locked-badge">Premium</span></div>
+        <div class="card-title">WebRTC Leak</div>
+        <div class="card-value">••••••••</div>
+        <div class="card-sub">IP leak detection</div>
+        <div class="lock-overlay"><div class="lock-icon">🔒</div><div class="lock-text">Upgrade to unlock</div></div>
+      </div>
+
+      <div class="card locked-card">
+        <div class="card-header"><div class="card-icon icon-green">🕵️</div><span class="locked-badge">Premium</span></div>
+        <div class="card-title">Tracker Detection</div>
+        <div class="card-value">••••••••</div>
+        <div class="card-sub">3rd party trackers</div>
+        <div class="lock-overlay"><div class="lock-icon">🔒</div><div class="lock-text">Upgrade to unlock</div></div>
+      </div>
+
+      <div class="card locked-card">
+        <div class="card-header"><div class="card-icon icon-purple">💾</div><span class="locked-badge">Premium</span></div>
+        <div class="card-title">Storage Analysis</div>
+        <div class="card-value">••••••••</div>
+        <div class="card-sub">localStorage & sessions</div>
+        <div class="lock-overlay"><div class="lock-icon">🔒</div><div class="lock-text">Upgrade to unlock</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://xlxpixpvpwjjdwucojmb.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_vlkhbSh5bF5BUoO65yzoLQ_-25i9e-S';
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentUser = null;
+
+    async function init() {
+      const { data } = await sb.auth.getSession();
+      if (!data.session) return window.location.href = '/login';
+      currentUser = data.session.user;
+      document.getElementById('user-email').textContent = currentUser.email || currentUser.phone || 'User';
+
+      // Check if already paid
+      const res = await fetch('/check-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: currentUser.id })
+      });
+      const payment = await res.json();
+      if (payment.hasPaid) return window.location.href = '/analyzer';
+
+      runFreeScans();
+    }
+
+    function getBrowser(ua) {
+      if (ua.includes('Edg/')) return 'Edge';
+      if (ua.includes('Firefox')) return 'Firefox';
+      if (ua.includes('Chrome')) return 'Chrome';
+      if (ua.includes('Safari')) return 'Safari';
+      return 'Unknown';
+    }
+
+    function getOS(ua) {
+      if (ua.includes('Windows')) return 'Windows';
+      if (ua.includes('Mac')) return 'macOS';
+      if (ua.includes('Android')) return 'Android';
+      if (ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
+      if (ua.includes('Linux')) return 'Linux';
+      return 'Unknown';
+    }
+
+    async function runFreeScans() {
+      const ua = navigator.userAgent;
+      document.getElementById('browser-val').textContent = getBrowser(ua);
+      document.getElementById('os-val').textContent = getOS(ua);
+      document.getElementById('cookie-val').textContent = document.cookie.split(';').filter(c => c.trim()).length + ' cookies';
+      document.getElementById('dnt-val').textContent = navigator.doNotTrack === '1' ? 'Enabled ✓' : 'Not set';
+
+      try {
+        const r = await fetch('https://ipapi.co/json/');
+        const d = await r.json();
+        document.getElementById('ip-val').innerHTML = '<span class="live-dot"></span>' + (d.ip || '–');
+        document.getElementById('ip-loc').textContent = [d.city, d.country_name].filter(Boolean).join(', ');
+      } catch(e) {
+        document.getElementById('ip-val').textContent = 'Could not fetch';
+      }
+
+      // Simple score for free tier
+      let score = 50;
+      if (navigator.doNotTrack === '1') score += 10;
+      animateScore(score);
+    }
+
+    function animateScore(score) {
+      const arc = document.getElementById('score-arc');
+      const display = document.getElementById('score-display');
+      const circumference = 314;
+      arc.style.transition = 'stroke-dashoffset 1.2s ease';
+      arc.style.strokeDashoffset = circumference - (score / 100) * circumference;
+      arc.style.stroke = score >= 70 ? '#10b981' : score >= 40 ? '#f59e0b' : '#ef4444';
+      let cur = 0;
+      const step = setInterval(() => {
+        cur = Math.min(cur + 2, score);
+        display.textContent = cur;
+        if (cur >= score) clearInterval(step);
+      }, 20);
+      document.getElementById('score-title').textContent = score >= 70 ? 'Good Privacy' : score >= 40 ? 'Moderate Risk' : 'High Risk!';
+      document.getElementById('score-desc').textContent = 'Upgrade to see your full privacy report with detailed recommendations.';
+    }
+
+    async function upgrade() {
+      const res = await fetch('/create-order', { method: 'POST' });
+      const data = await res.json();
+      const options = {
+        key: data.keyId,
+        amount: data.amount,
+        currency: data.currency,
+        name: 'PrivacyAnalyzer',
+        description: 'Lifetime Access',
+        order_id: data.orderId,
+        handler: async function(response) {
+          await fetch('/payment-success', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: currentUser.id, email: currentUser.email })
+          });
+          window.location.href = '/analyzer';
+        },
+        theme: { color: '#6366f1' }
+      };
+      const rzp = new Razorpay(options);
+      rzp.open();
+    }
+
+    async function logout() {
+      await sb.auth.signOut();
+      window.location.href = '/';
+    }
+
+    init();
+  </script>
+</body>
+</html>

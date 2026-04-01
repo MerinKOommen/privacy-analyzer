@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PrivacyAnalyzer — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #070b14;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Animated background grid */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 0;
+    }
+
+    /* Glowing orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.15;
+      animation: float 8s ease-in-out infinite;
+      z-index: 0;
+    }
+    .orb1 { width: 400px; height: 400px; background: #6366f1; top: -100px; left: -100px; animation-delay: 0s; }
+    .orb2 { width: 300px; height: 300px; background: #06b6d4; bottom: -50px; right: -50px; animation-delay: 3s; }
+    .orb3 { width: 200px; height: 200px; background: #8b5cf6; top: 50%; left: 50%; animation-delay: 5s; }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(20px, -20px); }
+    }
+
+    /* Console animation on left */
+    .console-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 48px; }
+    .brand-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #6366f1, #06b6d4);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .brand-name { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+
+    .headline { font-size: 42px; font-weight: 700; line-height: 1.2; letter-spacing: -1px; margin-bottom: 16px; }
+    .headline span { background: linear-gradient(135deg, #6366f1, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtext { font-size: 15px; color: #6b7280; line-height: 1.7; max-width: 400px; margin-bottom: 40px; }
+
+    .console {
+      background: #0d1117;
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 480px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+    .console-header {
+      display: flex; align-items: center; gap: 6px; margin-bottom: 16px;
+      padding-bottom: 12px; border-bottom: 1px solid #1f2937;
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+    .console-title { color: #4b5563; font-size: 11px; margin-left: 8px; font-family: 'Inter', sans-serif; }
+
+    .console-line { margin-bottom: 6px; opacity: 0; animation: fadeInLine 0.3s forwards; }
+    .console-line.prompt::before { content: '$ '; color: #6366f1; }
+    .console-line.output { color: #10b981; padding-left: 12px; }
+    .console-line.warning { color: #f59e0b; padding-left: 12px; }
+    .console-line.info { color: #06b6d4; padding-left: 12px; }
+    .console-line.error { color: #ef4444; padding-left: 12px; }
+    .cursor { display: inline-block; width: 8px; height: 14px; background: #6366f1; animation: blink 1s infinite; vertical-align: middle; }
+
+    @keyframes fadeInLine { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* Right panel - login form */
+    .login-panel {
+      width: 460px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 48px;
+      background: rgba(13, 17, 23, 0.8);
+      backdrop-filter: blur(20px);
+      border-left: 1px solid #1f2937;
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-title { font-size: 26px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.5px; }
+    .login-sub { font-size: 14px; color: #6b7280; margin-bottom: 36px; }
+
+    .social-btn {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      width: 100%; padding: 13px;
+      border-radius: 10px; border: 1px solid #1f2937;
+      background: #0d1117; color: #e5e7eb;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      transition: all 0.2s; margin-bottom: 12px;
+      font-family: 'Inter', sans-serif;
+    }
+    .social-btn:hover { border-color: #6366f1; background: #111827; transform: translateY(-1px); }
+    .social-btn img { width: 18px; height: 18px; }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+    .divider-line { flex: 1; height: 1px; background: #1f2937; }
+    .divider-text { font-size: 12px; color: #4b5563; }
+
+    .input-group { margin-bottom: 16px; }
+    .input-label { font-size: 13px; color: #9ca3af; margin-bottom: 6px; display: block; font-weight: 500; }
+    .input-wrap { position: relative; }
+    .input-wrap input {
+      width: 100%; padding: 12px 16px;
+      background: #0d1117; border: 1px solid #1f2937;
+      border-radius: 10px; color: #fff; font-size: 14px;
+      font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s;
+    }
+    .input-wrap input:focus { border-color: #6366f1; }
+    .input-wrap input::placeholder { color: #374151; }
+
+    .phone-row { display: flex; gap: 8px; }
+    .country-code {
+      padding: 12px 14px; background: #0d1117; border: 1px solid #1f2937;
+      border-radius: 10px; color: #9ca3af; font-size: 14px; min-width: 70px;
+      font-family: 'Inter', sans-serif; outline: none;
+    }
+
+    .otp-row { display: flex; gap: 8px; margin-top: 8px; }
+    .otp-input {
+      flex: 1; padding: 12px; text-align: center;
+      background: #0d1117; border: 1px solid #1f2937;
+      border-radius: 10px; color: #fff; font-size: 18px; font-weight: 600;
+      outline: none; transition: border-color 0.2s;
+    }
+    .otp-input:focus { border-color: #6366f1; }
+
+    .primary-btn {
+      width: 100%; padding: 13px;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #fff; border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .primary-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .send-otp-btn {
+      padding: 12px 16px; white-space: nowrap;
+      background: #1f2937; color: #9ca3af; border: 1px solid #374151;
+      border-radius: 10px; font-size: 13px; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: all 0.2s;
+    }
+    .send-otp-btn:hover { background: #374151; color: #fff; }
+
+    .tab-row { display: flex; gap: 4px; margin-bottom: 24px; background: #0d1117; padding: 4px; border-radius: 10px; border: 1px solid #1f2937; }
+    .tab-btn { flex: 1; padding: 8px; border: none; background: transparent; color: #6b7280; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 7px; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+    .tab-btn.active { background: #1f2937; color: #fff; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .terms { font-size: 12px; color: #4b5563; text-align: center; margin-top: 20px; line-height: 1.6; }
+    .terms a { color: #6366f1; text-decoration: none; }
+
+    .status-msg { font-size: 13px; padding: 10px 14px; border-radius: 8px; margin-top: 8px; display: none; }
+    .status-success { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+    .status-error { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+
+    @media (max-width: 900px) {
+      .console-panel { display: none; }
+      .login-panel { width: 100%; border-left: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <!-- Left console panel -->
+  <div class="console-panel">
+    <div class="brand">
+      <div class="brand-icon">🔒</div>
+      <span class="brand-name">PrivacyAnalyzer</span>
+    </div>
+    <h1 class="headline">Know What the<br/>Internet Knows<br/>About <span>You</span></h1>
+    <p class="subtext">Scan your browser fingerprint, IP, cookies, and trackers in real time. Stay invisible online.</p>
+
+    <div class="console">
+      <div class="console-header">
+        <div class="dot dot-red"></div>
+        <div class="dot dot-yellow"></div>
+        <div class="dot dot-green"></div>
+        <span class="console-title">privacy-scan — terminal</span>
+      </div>
+      <div id="console-output"></div>
+    </div>
+  </div>
+
+  <!-- Right login panel -->
+  <div class="login-panel">
+    <h2 class="login-title">Welcome back</h2>
+    <p class="login-sub">Sign in to access your privacy dashboard</p>
+
+    <button class="social-btn" onclick="loginWithGoogle()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"/>
+      Continue with Google
+    </button>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <span class="divider-text">or continue with</span>
+      <div class="divider-line"></div>
+    </div>
+
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="switchTab('email', this)">Email</button>
+      <button class="tab-btn" onclick="switchTab('phone', this)">Phone OTP</button>
+    </div>
+
+    <!-- Email section -->
+    <div id="email-section" class="section active">
+      <div class="input-group">
+        <label class="input-label">Email address</label>
+        <div class="input-wrap">
+          <input type="email" id="email-input" placeholder="you@example.com"/>
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Password</label>
+        <div class="input-wrap">
+          <input type="password" id="password-input" placeholder="••••••••"/>
+        </div>
+      </div>
+      <button class="primary-btn" onclick="loginWithEmail()">Sign In</button>
+      <div id="email-status" class="status-msg"></div>
+      <p style="text-align:center; font-size:13px; color:#6b7280; margin-top:16px;">
+        No account? <a href="#" onclick="signupWithEmail()" style="color:#6366f1;">Create one free</a>
+      </p>
+    </div>
+
+    <!-- Phone section -->
+    <div id="phone-section" class="section">
+      <div class="input-group">
+        <label class="input-label">Phone number</label>
+        <div class="phone-row">
+          <input class="country-code" value="+91" readonly/>
+          <div class="input-wrap" style="flex:1">
+            <input type="tel" id="phone-input" placeholder="9876543210" maxlength="10"/>
+          </div>
+          <button class="send-otp-btn" onclick="sendOTP()">Send OTP</button>
+        </div>
+      </div>
+      <div id="otp-section" style="display:none">
+        <label class="input-label">Enter 6-digit OTP</label>
+        <div class="otp-row">
+          <input class="otp-input" maxlength="1" oninput="moveOTP(this, 1)"/>
+          <input class="otp-input" maxlength="1" oninput="moveOTP(this, 2)"/>
+          <input class="otp-input" maxlength="1" oninput="moveOTP(this, 3)"/>
+          <input class="otp-input" maxlength="1" oninput="moveOTP(this, 4)"/>
+          <input class="otp-input" maxlength="1" oninput="moveOTP(this, 5)"/>
+          <input class="otp-input" maxlength="1" oninput="moveOTP(this, 6)"/>
+        </div>
+        <button class="primary-btn" onclick="verifyOTP()" style="margin-top:16px;">Verify OTP</button>
+      </div>
+      <div id="phone-status" class="status-msg"></div>
+    </div>
+
+    <p class="terms">By continuing you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://xlxpixpvpwjjdwucojmb.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_vlkhbSh5bF5BUoO65yzoLQ_-25i9e-S';
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Console animation
+    const lines = [
+      { text: 'privacy-scan --init', type: 'prompt', delay: 500 },
+      { text: 'Initializing scanner...', type: 'info', delay: 1200 },
+      { text: 'Loading fingerprint module ✓', type: 'output', delay: 1800 },
+      { text: 'Loading IP tracker module ✓', type: 'output', delay: 2400 },
+      { text: 'Loading cookie scanner ✓', type: 'output', delay: 3000 },
+      { text: 'WARNING: WebRTC leak detected', type: 'warning', delay: 3600 },
+      { text: 'Canvas fingerprint exposed!', type: 'error', delay: 4200 },
+      { text: '3rd party trackers found: 7', type: 'error', delay: 4800 },
+      { text: 'Privacy score: 42/100', type: 'warning', delay: 5400 },
+      { text: 'Run full scan to see details...', type: 'info', delay: 6000 },
+    ];
+
+    const output = document.getElementById('console-output');
+    lines.forEach(line => {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        el.className = `console-line ${line.type}`;
+        el.textContent = line.text;
+        output.appendChild(el);
+        output.scrollTop = output.scrollHeight;
+      }, line.delay);
+    });
+
+    // Restart console animation every 8 seconds
+    setInterval(() => {
+      output.innerHTML = '';
+      lines.forEach(line => {
+        setTimeout(() => {
+          const el = document.createElement('div');
+          el.className = `console-line ${line.type}`;
+          el.textContent = line.text;
+          output.appendChild(el);
+        }, line.delay);
+      });
+    }, 9000);
+
+    function switchTab(tab, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(tab + '-section').classList.add('active');
+    }
+
+    function showStatus(id, msg, type) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.className = `status-msg status-${type}`;
+      el.style.display = 'block';
+    }
+
+    async function loginWithGoogle() {
+      const { error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + '/dashboard' }
+      });
+      if (error) showStatus('email-status', error.message, 'error');
+    }
+
+    async function loginWithEmail() {
+      const email = document.getElementById('email-input').value;
+      const password = document.getElementById('password-input').value;
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        showStatus('email-status', error.message, 'error');
+      } else {
+        window.location.href = '/dashboard';
+      }
+    }
+
+    async function signupWithEmail() {
+      const email = document.getElementById('email-input').value;
+      const password = document.getElementById('password-input').value;
+      if (!email || !password) return showStatus('email-status', 'Enter email and password', 'error');
+      const { error } = await sb.auth.signUp({ email, password });
+      if (error) {
+        showStatus('email-status', error.message, 'error');
+      } else {
+        showStatus('email-status', 'Check your email to confirm your account!', 'success');
+      }
+    }
+
+    async function sendOTP() {
+      const phone = '+91' + document.getElementById('phone-input').value;
+      const { error } = await sb.auth.signInWithOtp({ phone });
+      if (error) {
+        showStatus('phone-status', error.message, 'error');
+      } else {
+        document.getElementById('otp-section').style.display = 'block';
+        showStatus('phone-status', 'OTP sent to ' + phone, 'success');
+      }
+    }
+
+    function moveOTP(input, index) {
+      if (input.value && index < 6) {
+        document.querySelectorAll('.otp-input')[index].focus();
+      }
+    }
+
+    async function verifyOTP() {
+      const phone = '+91' + document.getElementById('phone-input').value;
+      const otp = Array.from(document.querySelectorAll('.otp-input')).map(i => i.value).join('');
+      const { error } = await sb.auth.verifyOtp({ phone, token: otp, type: 'sms' });
+      if (error) {
+        showStatus('phone-status', error.message, 'error');
+      } else {
+        window.location.href = '/dashboard';
+      }
+    }
+
+    // Check if already logged in
+    sb.auth.getSession().then(({ data }) => {
+      if (data.session) window.location.href = '/dashboard';
+    });
+  </script>
+</body>
+</html>
