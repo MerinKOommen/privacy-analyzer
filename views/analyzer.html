@@ -276,43 +276,18 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = 'https://xlxpixpvpwjjdwucojmb.supabase.co';
-    const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
+    const SUPABASE_ANON_KEY = 'sb_publishable_vlkhbSh5bF5BUoO65yzoLQ_-25i9e-S';
     const { createClient } = supabase;
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     async function init() {
-      // Listen for auth changes first
       sb.auth.onAuthStateChange((event, session) => {
-        if (session) {
-          document.getElementById('user-email').textContent = session.user.email || 'User';
-          if (!window.scanStarted) {
-            window.scanStarted = true;
-            runFullScan();
-          }
-        }
+        if (event === 'SIGNED_OUT') window.location.href = '/login';
       });
-
-      // Also check existing session
       const { data } = await sb.auth.getSession();
-      if (data?.session) {
-        document.getElementById('user-email').textContent = data.session.user.email || 'User';
-        window.scanStarted = true;
-        runFullScan();
-      } else {
-        // Wait 3 seconds for OAuth session to load
-        setTimeout(async () => {
-          const { data: data2 } = await sb.auth.getSession();
-          if (data2?.session) {
-            document.getElementById('user-email').textContent = data2.session.user.email || 'User';
-            if (!window.scanStarted) {
-              window.scanStarted = true;
-              runFullScan();
-            }
-          } else {
-            window.location.href = '/login';
-          }
-        }, 3000);
-      }
+      if (!data?.session) return window.location.href = '/login';
+      document.getElementById('user-email').textContent = data.session.user.email || 'User';
+      runFullScan();
     }
 
     function set(id, val) { const el = document.getElementById(id); if(el) el.textContent = val; }
