@@ -281,17 +281,38 @@
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     async function init() {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Listen for auth changes first
+      sb.auth.onAuthStateChange((event, session) => {
+        if (session) {
+          document.getElementById('user-email').textContent = session.user.email || 'User';
+          if (!window.scanStarted) {
+            window.scanStarted = true;
+            runFullScan();
+          }
+        }
+      });
+
+      // Also check existing session
       const { data } = await sb.auth.getSession();
-      if (!data.session) {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        const { data: data2 } = await sb.auth.getSession();
-        if (!data2.session) return window.location.href = '/login';
-        document.getElementById('user-email').textContent = data2.session.user.email || 'User';
-      } else {
+      if (data?.session) {
         document.getElementById('user-email').textContent = data.session.user.email || 'User';
+        window.scanStarted = true;
+        runFullScan();
+      } else {
+        // Wait 3 seconds for OAuth session to load
+        setTimeout(async () => {
+          const { data: data2 } = await sb.auth.getSession();
+          if (data2?.session) {
+            document.getElementById('user-email').textContent = data2.session.user.email || 'User';
+            if (!window.scanStarted) {
+              window.scanStarted = true;
+              runFullScan();
+            }
+          } else {
+            window.location.href = '/login';
+          }
+        }, 3000);
       }
-      runFullScan();
     }
 
     function set(id, val) { const el = document.getElementById(id); if(el) el.textContent = val; }
