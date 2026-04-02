@@ -316,10 +316,11 @@
 
       // IP & Location
       try {
-        const r = await fetch('https://ipapi.co/json/');
-        const d = await r.json();
-        const shortIp = d.ip && d.ip.includes(':') ? d.ip.substring(0, 20) + '...' : (d.ip || '–');
-        document.getElementById('ip-val').innerHTML = '<span class="live-dot"></span>' + shortIp;
+        const r = await fetch('https://api.ipify.org?format=json');
+        const ipData = await r.json();
+        const locRes = await fetch(`https://ipapi.co/${ipData.ip}/json/`);
+        const d = await locRes.json();
+        document.getElementById('ip-val').innerHTML = '<span class="live-dot"></span>' + ipData.ip;
         set('loc-val', [d.city, d.region, d.country_name].filter(Boolean).join(', '));
         set('isp-val', d.org || 'Unknown');
         if (d.proxy) {
