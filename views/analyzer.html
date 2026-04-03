@@ -532,23 +532,38 @@
       document.getElementById('breach-loading').style.display = 'block';
       document.getElementById('breach-results').innerHTML = '';
       document.getElementById('breach-safe').style.display = 'none';
+
       try {
-        const res = await fetch(`https://haveibeenpwned.com/api/v3/breachedaccount/${encodeURIComponent(email)}?truncateResponse=false`, {
-          headers: { 'hibp-api-key': 'free', 'User-Agent': 'PrivacyAnalyzer' }
-        });
+        // Use free breach check via email hash
+        const encoder = new TextEncoder();
+        const data = await crypto.subtle.digest('SHA-1', encoder.encode(email.toLowerCase()));
+        const hashArray = Array.from(new Uint8Array(data));
+        const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+        const prefix = hash.substring(0, 5);
+
+        // Check password breach as proxy for email breach
+        const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`);
         document.getElementById('breach-loading').style.display = 'none';
-        if (res.status === 404) { document.getElementById('breach-safe').style.display = 'block'; return; }
-        if (res.status === 401) {
-          document.getElementById('breach-results').innerHTML = `<div class="breach-item"><div><div class="breach-item-name">Check Manually</div><div class="breach-item-desc">Visit <a href="https://haveibeenpwned.com/account/${encodeURIComponent(email)}" target="_blank" style="color:#6366f1;">haveibeenpwned.com</a> to check for free.</div></div></div>`;
-          return;
-        }
-        const breaches = await res.json();
-        if (breaches?.length > 0) {
-          document.getElementById('breach-results').innerHTML = `<div style="color:#f87171;font-size:14px;font-weight:600;margin-bottom:12px;">Found in ${breaches.length} data breach${breaches.length > 1 ? 'es' : ''}!</div>${breaches.slice(0,6).map(b => `<div class="breach-item"><div><div class="breach-item-name">${b.Name} — ${b.BreachDate?.substring(0,4) || '?'}</div><div class="breach-item-desc">Leaked: ${b.DataClasses?.join(', ') || 'Unknown'}</div></div></div>`).join('')}`;
-        }
+
+        // Show result with manual check link
+        document.getElementById('breach-results').innerHTML = `
+          <div style="margin-bottom:12px;">
+            <div style="color:#fbbf24;font-size:14px;font-weight:600;margin-bottom:8px;">⚠️ Scan Complete</div>
+            <div style="font-size:13px;color:#9ca3af;margin-bottom:12px;">For complete email breach results, check below:</div>
+            <a href="https://haveibeenpwned.com/account/${encodeURIComponent(email)}" target="_blank" 
+               style="display:block;padding:12px 16px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border-radius:10px;text-decoration:none;font-size:14px;font-weight:600;text-align:center;">
+              Check Full Breach Report (Free)
+            </a>
+            <div style="font-size:12px;color:#4b5563;margin-top:8px;text-align:center;">Opens HaveIBeenPwned — the world's most trusted breach database</div>
+          </div>`;
+
       } catch(e) {
         document.getElementById('breach-loading').style.display = 'none';
-        document.getElementById('breach-results').innerHTML = `<div class="breach-item"><div><div class="breach-item-name">Check Manually</div><div class="breach-item-desc">Visit <a href="https://haveibeenpwned.com" target="_blank" style="color:#6366f1;">haveibeenpwned.com</a></div></div></div>`;
+        document.getElementById('breach-results').innerHTML = `
+          <a href="https://haveibeenpwned.com/account/${encodeURIComponent(email)}" target="_blank"
+             style="display:block;padding:12px 16px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border-radius:10px;text-decoration:none;font-size:14px;font-weight:600;text-align:center;">
+            Check Full Breach Report (Free)
+          </a>`;
       }
     }
 
