@@ -20,6 +20,20 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 );
 
+// Middleware to check auth
+async function requireAuth(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1] || req.query.token;
+  if (!token) return res.redirect('/login');
+  try {
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error || !data.user) return res.redirect('/login');
+    req.user = data.user;
+    next();
+  } catch(e) {
+    res.redirect('/login');
+  }
+}
+
 // Landing page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'landing.html'));
@@ -131,7 +145,34 @@ app.post('/payment-success', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+// AI Chat endpoint - using Groq free API
+app.post('/ai-chat', async (req, res) => {
+  const { message, scanData } = req.body;
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer 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'
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 1000,
+        messages: [
+          {
+            role: 'system',
+            content: `You are a privacy and cybersecurity expert inside PrivacyAnalyzer app. Explain privacy risks in simple everyday language that non-technical people understand. Here is the user current scan data: IP: ${scanData?.ip}, Location: ${scanData?.location}, VPN: ${scanData?.vpn}, Score: ${scanData?.score}/100, Trackers found: ${scanData?.trackers}, WebRTC: ${scanData?.webrtc}, Browser: ${scanData?.browser}, Cookies: ${scanData?.cookies}. Keep responses short, simple and actionable. Use bullet points when listing things.`
+          },
+          { role: 'user', content: message }
+        ]
+      })
+    });
+    const data = await response.json();
+    res.json({ reply: data.choices?.[0]?.message?.content || 'Sorry I could not process that.' });
+  } catch(err) {
+    res.status(500).json({ reply: 'Sorry I am having trouble. Please try again.' });
+  }
+});
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });

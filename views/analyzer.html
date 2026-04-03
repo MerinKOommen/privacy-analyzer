@@ -322,21 +322,14 @@
         Keep responses concise and actionable.
         Use bullet points when listing multiple things.`;
 
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await fetch('/ai-chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 1000,
-            system: systemPrompt,
-            messages: [{ role: 'user', content: msg }]
-          })
+          body: JSON.stringify({ message: msg, scanData })
         });
-
         const data = await res.json();
         removeTyping();
-        const reply = data.content?.[0]?.text || 'Sorry, I could not process that. Please try again.';
-        addMessage(reply, 'ai');
+        addMessage(data.reply, 'ai');
       } catch(e) {
         removeTyping();
         addMessage('Sorry, I am having trouble connecting. Please try again in a moment.', 'ai');
