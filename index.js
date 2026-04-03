@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const Razorpay = require('razorpay');
 const path = require('path');
+const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
@@ -20,26 +21,12 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 );
 
-// Middleware to check auth
-async function requireAuth(req, res, next) {
-  const token = req.headers.authorization?.split(' ')[1] || req.query.token;
-  if (!token) return res.redirect('/login');
-  try {
-    const { data, error } = await supabase.auth.getUser(token);
-    if (error || !data.user) return res.redirect('/login');
-    req.user = data.user;
-    next();
-  } catch(e) {
-    res.redirect('/login');
-  }
-}
-
 // Landing page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'landing.html'));
 });
 
-// Auth callback for Google OAuth
+// Auth callback
 app.get('/auth-callback', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'auth-callback.html'));
 });
@@ -49,17 +36,17 @@ app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'login.html'));
 });
 
-// Dashboard (after login - free limited access)
+// Dashboard
 app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'dashboard.html'));
 });
 
-// Full analyzer (paid users only)
+// Full analyzer
 app.get('/analyzer', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'analyzer.html'));
 });
 
-// Success page after payment
+// Success page
 app.get('/success', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'success.html'));
 });
@@ -67,6 +54,15 @@ app.get('/success', (req, res) => {
 // Admin login page
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'admin-login.html'));
+});
+
+// Terms and Privacy
+app.get('/terms', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'terms.html'));
+});
+
+app.get('/privacy', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'privacy.html'));
 });
 
 // Admin login check
@@ -126,7 +122,7 @@ app.post('/create-order', async (req, res) => {
   }
 });
 
-// Mark user as paid after successful payment
+// Mark user as paid
 app.post('/payment-success', async (req, res) => {
   const { userId, email } = req.body;
   try {
@@ -145,7 +141,7 @@ app.post('/payment-success', async (req, res) => {
   }
 });
 
-// AI Chat endpoint - using Groq free API
+// AI Chat endpoint using Groq
 app.post('/ai-chat', async (req, res) => {
   const { message, scanData } = req.body;
   try {
@@ -153,7 +149,7 @@ app.post('/ai-chat', async (req, res) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer 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'
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
@@ -173,6 +169,8 @@ app.post('/ai-chat', async (req, res) => {
     res.status(500).json({ reply: 'Sorry I am having trouble. Please try again.' });
   }
 });
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
